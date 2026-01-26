@@ -6,6 +6,7 @@ let valeHistorico = [];
 let comprasFuturas = [];
 let mesAtualData = new Date(); // mês base que está sendo trabalhado
 let indiceMesReaberto = null;  // controla se estamos editando um mês já existente
+let indiceValeReaberto = null; // controla se estamos editando um mês de vale já existente
 
 // Esperar Firebase carregar
 setTimeout(inicializar, 1000);
@@ -262,24 +263,19 @@ function fecharMes() {
     };
 
     if (indiceMesReaberto === null) {
-        // novo mês
         historico.unshift(mesHistorico);
     } else {
-        // edição de mês reaberto: substitui
         historico[indiceMesReaberto] = mesHistorico;
     }
 
-    // limpa controle de edição
     indiceMesReaberto = null;
 
-    // limpar mês atual
     despesas = [];
     document.getElementById('salario').value = '';
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
 
-    // avançar para o próximo mês de trabalho
     mesAtualData = new Date(mesAtualData);
     mesAtualData.setMonth(mesAtualData.getMonth() + 1);
 
@@ -341,7 +337,7 @@ function renderizarHistorico() {
 
 function reabrirHistorico(index) {
     const mes = historico[index];
-    indiceMesReaberto = index; // estamos editando este mês
+    indiceMesReaberto = index;
 
     const confirmar = confirm(
         `Reabrir ${mes.mes}? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
@@ -481,7 +477,14 @@ function renderizarValeHistorico() {
         <div class="historico-item">
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
-                <button class="btn-excluir-historico" onclick="excluirValeHistorico(${index})">Excluir</button>
+                <div>
+                    <button class="btn-remover" style="margin-right:8px;" onclick="reabrirValeHistorico(${index})">
+                        Reabrir
+                    </button>
+                    <button class="btn-excluir-historico" onclick="excluirValeHistorico(${index})">
+                        Excluir
+                    </button>
+                </div>
             </div>
             <div class="historico-resumo">
                 <div class="historico-resumo-item">
@@ -508,6 +511,28 @@ function renderizarValeHistorico() {
             </div>
         </div>
     `).join('');
+}
+
+function reabrirValeHistorico(index) {
+    const mes = valeHistorico[index];
+    indiceValeReaberto = index;
+
+    const confirmar = confirm(
+        `Reabrir ${mes.mes} do vale alimentação? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
+    );
+    if (!confirmar) return;
+
+    // Aqui vamos restaurar apenas as compras; recargas você pode recadastrar ou ajustar a lógica depois
+    valeRecargas = [];
+    valeCompras = mes.compras.map(c => ({ ...c }));
+
+    renderizarCompras();
+    atualizarValeResumo();
+    atualizarValeMesAtual();
+
+    salvarDados();
+
+    alert(`Mês do vale ${mes.mes} reaberto para edição.`);
 }
 
 function excluirValeHistorico(index) {
@@ -546,7 +571,13 @@ function fecharMesVale() {
         compras: [...valeCompras]
     };
 
-    valeHistorico.unshift(mesHistorico);
+    if (indiceValeReaberto === null) {
+        valeHistorico.unshift(mesHistorico);
+    } else {
+        valeHistorico[indiceValeReaberto] = mesHistorico;
+    }
+
+    indiceValeReaberto = null;
 
     valeRecargas = [];
     valeCompras = [];
