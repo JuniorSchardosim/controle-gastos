@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Gastos Mensais</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiot3S4wOXuPSDOFsTv2UwizOKS9rxepY",
+            authDomain: "controle-gastos-55f06.firebaseapp.com",
+            projectId: "controle-gastos-55f06",
+            storageBucket: "controle-gastos-55f06.firebasestorage.app",
+            messagingSenderId: "20319528232",
+            appId: "1:20319528232:web:056bb6e3a685e17abc1c1d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Disponibilizar globalmente
+        window.db = db;
+        window.firestore = { collection, doc, setDoc, getDoc, onSnapshot };
+    </script>
 </head>
 <body>
     <div class="tabs">
