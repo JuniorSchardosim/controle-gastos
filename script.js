@@ -293,7 +293,14 @@ function renderizarHistorico() {
         <div class="historico-item">
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
-                <button class="btn-excluir-historico" onclick="excluirHistorico(${index})">Excluir</button>
+                <div>
+                    <button class="btn-remover" style="margin-right:8px;" onclick="reabrirHistorico(${index})">
+                        Reabrir
+                    </button>
+                    <button class="btn-excluir-historico" onclick="excluirHistorico(${index})">
+                        Excluir
+                    </button>
+                </div>
             </div>
             <div class="historico-resumo">
                 <div class="historico-resumo-item">
@@ -320,6 +327,40 @@ function renderizarHistorico() {
             </div>
         </div>
     `).join('');
+}
+
+function reabrirHistorico(index) {
+    const mes = historico[index];
+    const confirmar = confirm(
+        `Reabrir ${mes.mes}? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
+    );
+    if (!confirmar) return;
+
+    // Restaurar salário e despesas daquele mês
+    document.getElementById('salario').value = mes.salario.toFixed(2);
+    despesas = mes.despesas.map(d => ({ ...d }));
+
+    // Ajustar mesAtualData para o mês/ano do histórico
+    const partes = mes.mes.split(' de ');
+    if (partes.length === 2) {
+        const nomeMes = partes[0];
+        const ano = parseInt(partes[1], 10);
+        const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const idxMes = mesesNomes.indexOf(nomeMes);
+        if (idxMes !== -1 && !isNaN(ano)) {
+            mesAtualData = new Date(ano, idxMes, 1);
+        }
+    }
+
+    renderizarDespesas();
+    atualizarResumo();
+    atualizarMesAtual();
+    atualizarValeMesAtual();
+
+    salvarDados();
+
+    alert(`Mês ${mes.mes} reaberto para edição.`);
 }
 
 function excluirHistorico(index) {
