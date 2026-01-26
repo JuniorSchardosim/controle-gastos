@@ -5,6 +5,7 @@ let valeCompras = [];
 let valeHistorico = [];
 let comprasFuturas = [];
 let mesAtualData = new Date(); // mês base que está sendo trabalhado
+let indiceMesReaberto = null;  // controla se estamos editando um mês já existente
 
 // Esperar Firebase carregar
 setTimeout(inicializar, 1000);
@@ -260,7 +261,16 @@ function fecharMes() {
         saldo: saldo
     };
 
-    historico.unshift(mesHistorico);
+    if (indiceMesReaberto === null) {
+        // novo mês
+        historico.unshift(mesHistorico);
+    } else {
+        // edição de mês reaberto: substitui
+        historico[indiceMesReaberto] = mesHistorico;
+    }
+
+    // limpa controle de edição
+    indiceMesReaberto = null;
 
     // limpar mês atual
     despesas = [];
@@ -331,16 +341,16 @@ function renderizarHistorico() {
 
 function reabrirHistorico(index) {
     const mes = historico[index];
+    indiceMesReaberto = index; // estamos editando este mês
+
     const confirmar = confirm(
         `Reabrir ${mes.mes}? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
     );
     if (!confirmar) return;
 
-    // Restaurar salário e despesas daquele mês
     document.getElementById('salario').value = mes.salario.toFixed(2);
     despesas = mes.despesas.map(d => ({ ...d }));
 
-    // Ajustar mesAtualData para o mês/ano do histórico
     const partes = mes.mes.split(' de ');
     if (partes.length === 2) {
         const nomeMes = partes[0];
