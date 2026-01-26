@@ -10,6 +10,7 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="mudarAba('despesas')">💰 Despesas Mensais</button>
         <button class="tab-btn" onclick="mudarAba('vale')">🛒 Vale Alimentação</button>
+        <button class="tab-btn" onclick="mudarAba('futuras')">📅 Compras Futuras</button>
     </div>
 
     <div class="container">
@@ -117,6 +118,41 @@
             <h2>📊 Histórico de Vale Alimentação</h2>
             <div class="historico-lista" id="vale-historico-lista">
                 <p class="vazio">Nenhum histórico ainda</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA COMPRAS FUTURAS -->
+    <div id="aba-futuras" class="aba-conteudo">
+        <h1>📅 Compras Futuras Planejadas</h1>
+
+        <div class="mes-atual">
+            <h2>Planeje suas próximas compras</h2>
+        </div>
+
+        <div class="despesas-section">
+            <h2>Adicionar Compra Futura</h2>
+            <div class="despesa-form">
+                <input type="text" id="nome-futura" placeholder="Nome do item/serviço">
+                <input type="number" id="valor-futura" placeholder="R$ 0,00" step="0.01">
+                <input type="date" id="data-futura">
+                <select id="prioridade-futura">
+                    <option value="baixa">Prioridade Baixa</option>
+                    <option value="media">Prioridade Média</option>
+                    <option value="alta">Prioridade Alta</option>
+                </select>
+                <button class="btn-adicionar" onclick="adicionarCompraFutura()">Adicionar</button>
+            </div>
+
+            <div class="lista-despesas" id="lista-futuras">
+                <p class="vazio">Nenhuma compra futura planejada</p>
+            </div>
+        </div>
+
+        <div class="resumo">
+            <div class="resumo-item">
+                <span class="resumo-label">Total Planejado:</span>
+                <span class="resumo-valor" id="total-futuras">R$ 0,00</span>
             </div>
         </div>
     </div>
