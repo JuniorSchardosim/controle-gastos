@@ -5,48 +5,61 @@ let valeCompras = [];
 let valeHistorico = [];
 let comprasFuturas = [];
 
-function carregarDados() {
-    const salarioSalvo = localStorage.getItem('salario');
-    const despesasSalvas = localStorage.getItem('despesas');
-    const historicoSalvo = localStorage.getItem('historico');
-    const valeRecargasSalvas = localStorage.getItem('valeRecargas');
-    const valeComprasSalvas = localStorage.getItem('valeCompras');
-    const valeHistoricoSalvo = localStorage.getItem('valeHistorico');
-    const comprasFuturasSalvas = localStorage.getItem('comprasFuturas');
+// Esperar Firebase carregar
+setTimeout(inicializar, 1000);
 
-    if (salarioSalvo) {
-        document.getElementById('salario').value = salarioSalvo;
+function inicializar() {
+    if (!window.db) {
+        console.error('Firebase não carregado, tentando novamente...');
+        setTimeout(inicializar, 1000);
+        return;
     }
+    
+    carregarDados();
+    setupListeners();
+}
 
-    if (despesasSalvas) {
-        despesas = JSON.parse(despesasSalvas);
-        renderizarDespesas();
+async function carregarDados() {
+    try {
+        // Carregar dados do Firebase
+        const docRef = window.firestore.doc(window.db, 'dados', 'principal');
+        const docSnap = await window.firestore.getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const dados = docSnap.data();
+            
+            if (dados.salario) {
+                document.getElementById('salario').value = dados.salario;
+            }
+            if (dados.despesas) {
+                despesas = dados.despesas;
+                renderizarDespesas();
+            }
+            if (dados.historico) {
+                historico = dados.historico;
+                renderizarHistorico();
+            }
+            if (dados.valeRecargas) {
+                valeRecargas = dados.valeRecargas;
+            }
+            if (dados.valeCompras) {
+                valeCompras = dados.valeCompras;
+                renderizarCompras();
+            }
+            if (dados.valeHistorico) {
+                valeHistorico = dados.valeHistorico;
+                renderizarValeHistorico();
+            }
+            if (dados.comprasFuturas) {
+                comprasFuturas = dados.comprasFuturas;
+                renderizarComprasFuturas();
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        alert('Erro ao carregar dados do Firebase. Verifique a conexão.');
     }
-
-    if (historicoSalvo) {
-        historico = JSON.parse(historicoSalvo);
-        renderizarHistorico();
-    }
-
-    if (valeRecargasSalvas) {
-        valeRecargas = JSON.parse(valeRecargasSalvas);
-    }
-
-    if (valeComprasSalvas) {
-        valeCompras = JSON.parse(valeComprasSalvas);
-        renderizarCompras();
-    }
-
-    if (valeHistoricoSalvo) {
-        valeHistorico = JSON.parse(valeHistoricoSalvo);
-        renderizarValeHistorico();
-    }
-
-    if (comprasFuturasSalvas) {
-        comprasFuturas = JSON.parse(comprasFuturasSalvas);
-        renderizarComprasFuturas();
-    }
-
+    
     atualizarResumo();
     atualizarValeResumo();
     atualizarFuturasResumo();
@@ -54,14 +67,52 @@ function carregarDados() {
     atualizarValeMesAtual();
 }
 
-function salvarDados() {
-    localStorage.setItem('salario', document.getElementById('salario').value);
-    localStorage.setItem('despesas', JSON.stringify(despesas));
-    localStorage.setItem('historico', JSON.stringify(historico));
-    localStorage.setItem('valeRecargas', JSON.stringify(valeRecargas));
-    localStorage.setItem('valeCompras', JSON.stringify(valeCompras));
-    localStorage.setItem('valeHistorico', JSON.stringify(valeHistorico));
-    localStorage.setItem('comprasFuturas', JSON.stringify(comprasFuturas));
+function setupListeners() {
+    // Listener em tempo real para sincronização
+    const docRef = window.firestore.doc(window.db, 'dados', 'principal');
+    window.firestore.onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+            const dados = doc.data();
+            
+            // Atualizar apenas se houver mudanças
+            if (JSON.stringify(dados.despesas) !== JSON.stringify(despesas)) {
+                despesas = dados.despesas || [];
+                renderizarDespesas();
+                atualizarResumo();
+            }
+            
+            if (JSON.stringify(dados.valeCompras) !== JSON.stringify(valeCompras)) {
+                valeCompras = dados.valeCompras || [];
+                renderizarCompras();
+                atualizarValeResumo();
+            }
+            
+            if (JSON.stringify(dados.comprasFuturas) !== JSON.stringify(comprasFuturas)) {
+                comprasFuturas = dados.comprasFuturas || [];
+                renderizarComprasFuturas();
+                atualizarFuturasResumo();
+            }
+        }
+    });
+}
+
+async function salvarDados() {
+    try {
+        const docRef = window.firestore.doc(window.db, 'dados', 'principal');
+        await window.firestore.setDoc(docRef, {
+            salario: document.getElementById('salario').value,
+            despesas: despesas,
+            historico: historico,
+            valeRecargas: valeRecargas,
+            valeCompras: valeCompras,
+            valeHistorico: valeHistorico,
+            comprasFuturas: comprasFuturas,
+            ultimaAtualizacao: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Erro ao salvar dados:', error);
+        alert('Erro ao salvar dados. Tente novamente.');
+    }
 }
 
 function atualizarMesAtual() {
@@ -513,5 +564,3 @@ function atualizarFuturasResumo() {
     const total = comprasFuturas.reduce((sum, c) => sum + c.valor, 0);
     document.getElementById('total-futuras').textContent = `R$ ${total.toFixed(2)}`;
 }
-
-carregarDados();
