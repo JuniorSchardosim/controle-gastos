@@ -195,21 +195,33 @@ function renderizarDespesas() {
         return;
     }
 
-    lista.innerHTML = despesas.map((despesa, index) => `
-        <div class="despesa-item">
-            <div class="despesa-info">
-                <div class="despesa-nome">
-                    ${despesa.nome}
-                    ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
+    lista.innerHTML = despesas.map((despesa, index) => {
+        let infoExtra = '';
+        
+        if (despesa.fixa) {
+            infoExtra = 'Despesa fixa - repete todos os meses';
+        } else if (despesa.meses > 1) {
+            infoExtra = `Faltam ${despesa.meses} parcela(s)`;
+        } else if (despesa.meses === 1) {
+            infoExtra = 'Última parcela';
+        } else {
+            infoExtra = 'Pagamento único';
+        }
+        
+        return `
+            <div class="despesa-item">
+                <div class="despesa-info">
+                    <div class="despesa-nome">
+                        ${despesa.nome}
+                        ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
+                    </div>
+                    <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
+                    <div class="despesa-info-extra">${infoExtra}</div>
                 </div>
-                <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
-                <div class="despesa-info-extra">
-                    ${despesa.meses > 1 ? `Parcelado em ${despesa.meses}x` : 'Pagamento único'}
-                </div>
+                <button class="btn-remover" onclick="removerDespesa(${index})">Remover</button>
             </div>
-            <button class="btn-remover" onclick="removerDespesa(${index})">Remover</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function atualizarResumo() {
@@ -252,14 +264,35 @@ function fecharMes() {
 
     historico.unshift(mesHistorico);
 
-    despesas = [];
+    // Processar despesas para o próximo mês
+    const despesasProximoMes = [];
+    
+    despesas.forEach(despesa => {
+        if (despesa.fixa) {
+            // Despesa fixa: mantém para sempre
+            despesasProximoMes.push({ ...despesa });
+        } else if (despesa.meses > 1) {
+            // Despesa parcelada: diminui o contador
+            despesasProximoMes.push({
+                ...despesa,
+                meses: despesa.meses - 1
+            });
+        }
+        // Se não é fixa nem tem mais parcelas, não adiciona ao próximo mês
+    });
+
+    despesas = despesasProximoMes;
     document.getElementById('salario').value = '';
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
     salvarDados();
 
-    alert('Mês fechado e salvo no histórico com sucesso!');
+    const mensagemFixas = despesasProximoMes.length > 0 
+        ? `\n\n${despesasProximoMes.length} despesa(s) foram automaticamente transferidas para o próximo mês.`
+        : '';
+
+    alert('Mês fechado e salvo no histórico com sucesso!' + mensagemFixas);
 }
 
 function renderizarHistorico() {
