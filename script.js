@@ -166,6 +166,8 @@ function mudarAba(aba) {
 
 // FUNÇÕES DE NAVEGAÇÃO DE MÊS
 function voltarMes() {
+    console.log('Voltando mês...');
+    mesAtualData = new Date(mesAtualData);
     mesAtualData.setMonth(mesAtualData.getMonth() - 1);
     atualizarMesAtual();
     atualizarValeMesAtual();
@@ -174,6 +176,8 @@ function voltarMes() {
 }
 
 function avancarMes() {
+    console.log('Avançando mês...');
+    mesAtualData = new Date(mesAtualData);
     mesAtualData.setMonth(mesAtualData.getMonth() + 1);
     atualizarMesAtual();
     atualizarValeMesAtual();
@@ -182,6 +186,7 @@ function avancarMes() {
 }
 
 function irParaMesAtual() {
+    console.log('Indo para mês atual...');
     mesAtualData = new Date();
     atualizarMesAtual();
     atualizarValeMesAtual();
