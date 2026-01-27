@@ -455,6 +455,23 @@ function reabrirHistorico(index) {
     alert(`Mês ${mes.mes} reaberto para edição.`);
 }
 
+// NOVA FUNÇÃO: Excluir Histórico de Despesas
+function excluirHistorico(index) {
+    const mes = historico[index];
+    
+    const confirmar = confirm(
+        `Tem certeza que deseja excluir permanentemente o histórico de ${mes.mes}? Esta ação não pode ser desfeita.`
+    );
+    
+    if (!confirmar) return;
+    
+    historico.splice(index, 1);
+    renderizarHistorico();
+    salvarDados();
+    
+    alert(`Histórico de ${mes.mes} excluído com sucesso!`);
+}
+
 // FUNÇÕES VALE ALIMENTAÇÃO
 function adicionarRecarga() {
     const valor = parseFloat(document.getElementById('vale-recarga').value);
@@ -625,6 +642,23 @@ function reabrirValeHistorico(index) {
     salvarDados();
 
     alert(`Mês do vale ${mes.mes} reaberto para edição.`);
+}
+
+// NOVA FUNÇÃO: Excluir Histórico do Vale
+function excluirValeHistorico(index) {
+    const mes = valeHistorico[index];
+    
+    const confirmar = confirm(
+        `Tem certeza que deseja excluir permanentemente o histórico de ${mes.mes} do vale alimentação? Esta ação não pode ser desfeita.`
+    );
+    
+    if (!confirmar) return;
+    
+    valeHistorico.splice(index, 1);
+    renderizarValeHistorico();
+    salvarDados();
+    
+    alert(`Histórico de vale alimentação de ${mes.mes} excluído com sucesso!`);
 }
 
 function fecharMesVale() {
