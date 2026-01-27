@@ -260,7 +260,7 @@ function renderizarDespesas() {
         let infoExtra = '';
         if (despesa.fixa) infoExtra = 'Despesa fixa - repete todos os meses';
         else if (despesa.meses > 1) infoExtra = `Faltam ${despesa.meses} parcela(s)`;
-        else if (despesa.meses === 1) infoExtra = 'Única parcela';
+        else if (despesa.meses === 1) infoExtra = 'Última parcela';
         else infoExtra = 'Pagamento único';
         
         return `
@@ -627,5 +627,6 @@ function atualizarFuturasResumo() {
     const total = comprasFuturas.reduce((sum, c) => sum + c.valor, 0);
     document.getElementById('total-futuras').textContent = `R$ ${total.toFixed(2)}`;
 }
+
 
 
