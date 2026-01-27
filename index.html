@@ -43,163 +43,157 @@
             <h1>💰 Controle de Gastos Mensais</h1>
             
             <div class="mes-atual">
-            <h2 id="mes-atual-nome">Carregando...</h2>
-            <button class="btn-fechar-mes" onclick="fecharMes()">Fechar Mês e Salvar no Histórico</button>
-        </div>
-
-        <div class="salario-section">
-            <label for="salario">Salário do Mês:</label>
-            <input type="number" id="salario" placeholder="R$ 0,00" step="0.01">
-        </div>
-
-        <div class="despesas-section">
-            <h2>Adicionar Despesa</h2>
-            <div class="despesa-form">
-                <input type="text" id="nome-despesa" placeholder="Nome da despesa">
-                <input type="number" id="valor-despesa" placeholder="R$ 0,00" step="0.01">
-                <input type="number" id="meses-despesa" placeholder="Quantos meses?" min="1">
-                <label class="checkbox-container">
-                    <input type="checkbox" id="despesa-fixa">
-                    <span>Despesa fixa</span>
-                </label>
-                <button class="btn-adicionar" onclick="adicionarDespesa()">Adicionar</button>
+                <h2 id="mes-atual-nome">Carregando...</h2>
+                <button class="btn-fechar-mes" onclick="fecharMes()">Fechar Mês e Salvar no Histórico</button>
             </div>
 
-            <div class="lista-despesas" id="lista-despesas">
-                <p class="vazio">Nenhuma despesa adicionada</p>
+            <div class="salario-section">
+                <label for="salario">Salário do Mês:</label>
+                <input type="number" id="salario" placeholder="R$ 0,00" step="0.01">
             </div>
-        </div>
 
-        <div class="resumo">
-            <div class="resumo-item">
-                <span class="resumo-label">Salário:</span>
-                <span class="resumo-valor" id="resumo-salario">R$ 0,00</span>
+            <div class="despesas-section">
+                <h2>Adicionar Despesa</h2>
+                <div class="despesa-form">
+                    <input type="text" id="nome-despesa" placeholder="Nome da despesa">
+                    <input type="number" id="valor-despesa" placeholder="R$ 0,00" step="0.01">
+                    <input type="number" id="meses-despesa" placeholder="Quantos meses?" min="1">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="despesa-fixa">
+                        <span>Despesa fixa</span>
+                    </label>
+                    <button class="btn-adicionar" onclick="adicionarDespesa()">Adicionar</button>
+                </div>
+
+                <div class="lista-despesas" id="lista-despesas">
+                    <p class="vazio">Nenhuma despesa adicionada</p>
+                </div>
             </div>
-            <div class="resumo-item">
-                <span class="resumo-label">Total de Despesas:</span>
-                <span class="resumo-valor" id="resumo-despesas">R$ 0,00</span>
+
+            <div class="resumo">
+                <div class="resumo-item">
+                    <span class="resumo-label">Salário:</span>
+                    <span class="resumo-valor" id="resumo-salario">R$ 0,00</span>
+                </div>
+                <div class="resumo-item">
+                    <span class="resumo-label">Total de Despesas:</span>
+                    <span class="resumo-valor" id="resumo-despesas">R$ 0,00</span>
+                </div>
+                <div class="resumo-item">
+                    <span class="resumo-label">Saldo:</span>
+                    <span class="resumo-valor" id="resumo-saldo">R$ 0,00</span>
+                </div>
             </div>
-            <div class="resumo-item">
-                <span class="resumo-label">Saldo:</span>
-                <span class="resumo-valor" id="resumo-saldo">R$ 0,00</span>
+
+            <div class="historico-section">
+                <h2>📊 Histórico de Meses Anteriores</h2>
+                <div class="historico-lista" id="historico-lista">
+                    <p class="vazio">Nenhum mês fechado ainda</p>
+                </div>
             </div>
-        </div>
-
-        <div class="historico-section">
-            <h2>📊 Histórico de Meses Anteriores</h2>
-            <div class="historico-lista" id="historico-lista">
-                <p class="vazio">Nenhum mês fechado ainda</p>
-            </div>
-        </div>
-        
-        <!-- Navegação de Mês -->
-        <div class="navegacao-mes">
-            <button class="btn-nav-mes" onclick="voltarMes()">◀ Anterior</button>
-            <button class="btn-nav-mes" onclick="avancarMes()">Seguinte ▶</button>
-        </div>
-    </div>
-
-    <!-- ABA VALE ALIMENTAÇÃO -->
-    <div id="aba-vale" class="aba-conteudo">
-        <h1>🛒 Controle de Vale Alimentação</h1>
-
-        <div class="mes-atual">
-            <h2 id="vale-mes-atual">Carregando...</h2>
-            <button class="btn-fechar-mes" onclick="fecharMesVale()">Fechar Mês do Vale e Salvar no Histórico</button>
-        </div>
-
-        <div class="vale-saldo-section">
-            <div class="vale-input-group">
-                <label for="vale-recarga">Valor Recarregado:</label>
-                <input type="number" id="vale-recarga" placeholder="R$ 0,00" step="0.01">
-                <button class="btn-adicionar" onclick="adicionarRecarga()">Adicionar Recarga</button>
+            
+            <!-- Navegação de Mês Despesas -->
+            <div class="navegacao-mes">
+                <button class="btn-nav-mes" onclick="voltarMes()">◀ Anterior</button>
+                <button class="btn-nav-mes" onclick="avancarMes()">Seguinte ▶</button>
             </div>
         </div>
 
-        <div class="despesas-section">
-            <h2>Adicionar Compra no Supermercado</h2>
-            <div class="despesa-form">
-                <input type="text" id="nome-compra" placeholder="Nome do supermercado">
-                <input type="number" id="valor-compra" placeholder="R$ 0,00" step="0.01">
-                <input type="date" id="data-compra">
-                <button class="btn-adicionar" onclick="adicionarCompra()">Adicionar</button>
+        <!-- ABA VALE ALIMENTAÇÃO -->
+        <div id="aba-vale" class="aba-conteudo">
+            <h1>🛒 Controle de Vale Alimentação</h1>
+
+            <div class="mes-atual">
+                <h2 id="vale-mes-atual">Carregando...</h2>
+                <button class="btn-fechar-mes" onclick="fecharMesVale()">Fechar Mês do Vale e Salvar no Histórico</button>
             </div>
 
-            <div class="lista-despesas" id="lista-compras">
-                <p class="vazio">Nenhuma compra adicionada</p>
+            <div class="vale-saldo-section">
+                <div class="vale-input-group">
+                    <label for="vale-recarga">Valor Recarregado:</label>
+                    <input type="number" id="vale-recarga" placeholder="R$ 0,00" step="0.01">
+                    <button class="btn-adicionar" onclick="adicionarRecarga()">Adicionar Recarga</button>
+                </div>
+            </div>
+
+            <div class="despesas-section">
+                <h2>Adicionar Compra no Supermercado</h2>
+                <div class="despesa-form">
+                    <input type="text" id="nome-compra" placeholder="Nome do supermercado">
+                    <input type="number" id="valor-compra" placeholder="R$ 0,00" step="0.01">
+                    <input type="date" id="data-compra">
+                    <button class="btn-adicionar" onclick="adicionarCompra()">Adicionar</button>
+                </div>
+
+                <div class="lista-despesas" id="lista-compras">
+                    <p class="vazio">Nenhuma compra adicionada</p>
+                </div>
+            </div>
+
+            <div class="resumo">
+                <div class="resumo-item">
+                    <span class="resumo-label">Total Recarregado:</span>
+                    <span class="resumo-valor" id="vale-total-recarga">R$ 0,00</span>
+                </div>
+                <div class="resumo-item">
+                    <span class="resumo-label">Total Gasto:</span>
+                    <span class="resumo-valor" id="vale-total-gasto">R$ 0,00</span>
+                </div>
+                <div class="resumo-item">
+                    <span class="resumo-label">Saldo Vale:</span>
+                    <span class="resumo-valor" id="vale-saldo">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="historico-section">
+                <h2>📊 Histórico de Vale Alimentação</h2>
+                <div class="historico-lista" id="vale-historico-lista">
+                    <p class="vazio">Nenhum histórico ainda</p>
+                </div>
+            </div>
+            
+            <!-- Navegação de Mês Vale -->
+            <div class="navegacao-mes">
+                <button class="btn-nav-mes" onclick="voltarMesVale()">◀ Anterior</button>
+                <button class="btn-nav-mes" onclick="avancarMesVale()">Seguinte ▶</button>
             </div>
         </div>
 
-        <div class="resumo">
-            <div class="resumo-item">
-                <span class="resumo-label">Total Recarregado:</span>
-                <span class="resumo-valor" id="vale-total-recarga">R$ 0,00</span>
-            </div>
-            <div class="resumo-item">
-                <span class="resumo-label">Total Gasto:</span>
-                <span class="resumo-valor" id="vale-total-gasto">R$ 0,00</span>
-            </div>
-            <div class="resumo-item">
-                <span class="resumo-label">Saldo Vale:</span>
-                <span class="resumo-valor" id="vale-saldo">R$ 0,00</span>
-            </div>
-        </div>
+        <!-- ABA COMPRAS FUTURAS -->
+        <div id="aba-futuras" class="aba-conteudo">
+            <h1>📅 Compras Futuras Planejadas</h1>
 
-        <div class="historico-section">
-            <h2>📊 Histórico de Vale Alimentação</h2>
-            <div class="historico-lista" id="vale-historico-lista">
-                <p class="vazio">Nenhum histórico ainda</p>
-            </div>
-        </div>
-        
-        <!-- Navegação de Mês -->
-        <div class="navegacao-mes">
-            <button class="btn-nav-mes" onclick="voltarMes()">◀ Anterior</button>
-            <button class="btn-nav-mes" onclick="avancarMes()">Seguinte ▶</button>
-        </div>
-    </div>
-
-    <!-- ABA COMPRAS FUTURAS -->
-    <div id="aba-futuras" class="aba-conteudo">
-        <h1>📅 Compras Futuras Planejadas</h1>
-
-        <div class="mes-atual">
-            <h2>Planeje suas próximas compras</h2>
-        </div>
-
-        <div class="despesas-section">
-            <h2>Adicionar Compra Futura</h2>
-            <div class="despesa-form">
-                <input type="text" id="nome-futura" placeholder="Nome do item/serviço">
-                <input type="number" id="valor-futura" placeholder="R$ 0,00" step="0.01">
-                <input type="date" id="data-futura">
-                <select id="prioridade-futura">
-                    <option value="baixa">Prioridade Baixa</option>
-                    <option value="media">Prioridade Média</option>
-                    <option value="alta">Prioridade Alta</option>
-                </select>
-                <button class="btn-adicionar" onclick="adicionarCompraFutura()">Adicionar</button>
+            <div class="mes-atual">
+                <h2>Planeje suas próximas compras</h2>
             </div>
 
-            <div class="lista-despesas" id="lista-futuras">
-                <p class="vazio">Nenhuma compra futura planejada</p>
-            </div>
-        </div>
+            <div class="despesas-section">
+                <h2>Adicionar Compra Futura</h2>
+                <div class="despesa-form">
+                    <input type="text" id="nome-futura" placeholder="Nome do item/serviço">
+                    <input type="number" id="valor-futura" placeholder="R$ 0,00" step="0.01">
+                    <input type="date" id="data-futura">
+                    <select id="prioridade-futura">
+                        <option value="baixa">Prioridade Baixa</option>
+                        <option value="media">Prioridade Média</option>
+                        <option value="alta">Prioridade Alta</option>
+                    </select>
+                    <button class="btn-adicionar" onclick="adicionarCompraFutura()">Adicionar</button>
+                </div>
 
-        <div class="resumo">
-            <div class="resumo-item">
-                <span class="resumo-label">Total Planejado:</span>
-                <span class="resumo-valor" id="total-futuras">R$ 0,00</span>
+                <div class="lista-despesas" id="lista-futuras">
+                    <p class="vazio">Nenhuma compra futura planejada</p>
+                </div>
             </div>
-        </div>
-        
-        <!-- Navegação de Mês -->
-        <div class="navegacao-mes">
-            <button class="btn-nav-mes" onclick="voltarMes()">◀ Anterior</button>
-            <button class="btn-nav-mes" onclick="avancarMes()">Seguinte ▶</button>
+
+            <div class="resumo">
+                <div class="resumo-item">
+                    <span class="resumo-label">Total Planejado:</span>
+                    <span class="resumo-valor" id="total-futuras">R$ 0,00</span>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
     <script src="script.js"></script>
 </body>
