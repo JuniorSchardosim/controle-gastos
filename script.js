@@ -4,9 +4,6 @@ let valeRecargas = [];
 let valeCompras = [];
 let valeHistorico = [];
 let comprasFuturas = [];
-let mesAtualData = new Date(); // mês base que está sendo trabalhado
-let indiceMesReaberto = null;  // controla se estamos editando um mês já existente
-let indiceValeReaberto = null; // controla se estamos editando um mês de vale já existente
 
 // Esperar Firebase carregar
 setTimeout(inicializar, 1000);
@@ -24,17 +21,12 @@ function inicializar() {
 
 async function carregarDados() {
     try {
+        // Carregar dados do Firebase
         const docRef = window.firestore.doc(window.db, 'dados', 'principal');
         const docSnap = await window.firestore.getDoc(docRef);
         
         if (docSnap.exists()) {
             const dados = docSnap.data();
-
-            if (dados.mesAtualData) {
-                mesAtualData = new Date(dados.mesAtualData);
-            } else {
-                mesAtualData = new Date();
-            }
             
             if (dados.salario) {
                 document.getElementById('salario').value = dados.salario;
@@ -62,8 +54,6 @@ async function carregarDados() {
                 comprasFuturas = dados.comprasFuturas;
                 renderizarComprasFuturas();
             }
-        } else {
-            mesAtualData = new Date();
         }
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -78,11 +68,13 @@ async function carregarDados() {
 }
 
 function setupListeners() {
+    // Listener em tempo real para sincronização
     const docRef = window.firestore.doc(window.db, 'dados', 'principal');
     window.firestore.onSnapshot(docRef, (doc) => {
         if (doc.exists()) {
             const dados = doc.data();
             
+            // Atualizar apenas se houver mudanças
             if (JSON.stringify(dados.despesas) !== JSON.stringify(despesas)) {
                 despesas = dados.despesas || [];
                 renderizarDespesas();
@@ -100,12 +92,6 @@ function setupListeners() {
                 renderizarComprasFuturas();
                 atualizarFuturasResumo();
             }
-
-            if (dados.mesAtualData && new Date(dados.mesAtualData).getTime() !== mesAtualData.getTime()) {
-                mesAtualData = new Date(dados.mesAtualData);
-                atualizarMesAtual();
-                atualizarValeMesAtual();
-            }
         }
     });
 }
@@ -121,7 +107,6 @@ async function salvarDados() {
             valeCompras: valeCompras,
             valeHistorico: valeHistorico,
             comprasFuturas: comprasFuturas,
-            mesAtualData: mesAtualData.toISOString(),
             ultimaAtualizacao: new Date().toISOString()
         });
     } catch (error) {
@@ -133,16 +118,18 @@ async function salvarDados() {
 function atualizarMesAtual() {
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const mesAtual = meses[mesAtualData.getMonth()];
-    const anoAtual = mesAtualData.getFullYear();
+    const data = new Date();
+    const mesAtual = meses[data.getMonth()];
+    const anoAtual = data.getFullYear();
     document.getElementById('mes-atual-nome').textContent = `${mesAtual} de ${anoAtual}`;
 }
 
 function atualizarValeMesAtual() {
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const mesAtual = meses[mesAtualData.getMonth()];
-    const anoAtual = mesAtualData.getFullYear();
+    const data = new Date();
+    const mesAtual = meses[data.getMonth()];
+    const anoAtual = data.getFullYear();
     document.getElementById('vale-mes-atual').textContent = `${mesAtual} de ${anoAtual}`;
 }
 
@@ -244,6 +231,7 @@ function fecharMes() {
     }
 
     const confirmar = confirm('Deseja fechar o mês atual e salvar no histórico? Os dados atuais serão zerados.');
+    
     if (!confirmar) return;
 
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
@@ -262,26 +250,13 @@ function fecharMes() {
         saldo: saldo
     };
 
-    if (indiceMesReaberto === null) {
-        historico.unshift(mesHistorico);
-    } else {
-        historico[indiceMesReaberto] = mesHistorico;
-    }
-
-    indiceMesReaberto = null;
+    historico.unshift(mesHistorico);
 
     despesas = [];
     document.getElementById('salario').value = '';
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
-
-    mesAtualData = new Date(mesAtualData);
-    mesAtualData.setMonth(mesAtualData.getMonth() + 1);
-
-    atualizarMesAtual();
-    atualizarValeMesAtual();
-
     salvarDados();
 
     alert('Mês fechado e salvo no histórico com sucesso!');
@@ -299,14 +274,7 @@ function renderizarHistorico() {
         <div class="historico-item">
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
-                <div>
-                    <button class="btn-remover" style="margin-right:8px;" onclick="reabrirHistorico(${index})">
-                        Reabrir
-                    </button>
-                    <button class="btn-excluir-historico" onclick="excluirHistorico(${index})">
-                        Excluir
-                    </button>
-                </div>
+                <button class="btn-excluir-historico" onclick="excluirHistorico(${index})">Excluir</button>
             </div>
             <div class="historico-resumo">
                 <div class="historico-resumo-item">
@@ -333,40 +301,6 @@ function renderizarHistorico() {
             </div>
         </div>
     `).join('');
-}
-
-function reabrirHistorico(index) {
-    const mes = historico[index];
-    indiceMesReaberto = index;
-
-    const confirmar = confirm(
-        `Reabrir ${mes.mes}? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
-    );
-    if (!confirmar) return;
-
-    document.getElementById('salario').value = mes.salario.toFixed(2);
-    despesas = mes.despesas.map(d => ({ ...d }));
-
-    const partes = mes.mes.split(' de ');
-    if (partes.length === 2) {
-        const nomeMes = partes[0];
-        const ano = parseInt(partes[1], 10);
-        const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-        const idxMes = mesesNomes.indexOf(nomeMes);
-        if (idxMes !== -1 && !isNaN(ano)) {
-            mesAtualData = new Date(ano, idxMes, 1);
-        }
-    }
-
-    renderizarDespesas();
-    atualizarResumo();
-    atualizarMesAtual();
-    atualizarValeMesAtual();
-
-    salvarDados();
-
-    alert(`Mês ${mes.mes} reaberto para edição.`);
 }
 
 function excluirHistorico(index) {
@@ -477,14 +411,7 @@ function renderizarValeHistorico() {
         <div class="historico-item">
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
-                <div>
-                    <button class="btn-remover" style="margin-right:8px;" onclick="reabrirValeHistorico(${index})">
-                        Reabrir
-                    </button>
-                    <button class="btn-excluir-historico" onclick="excluirValeHistorico(${index})">
-                        Excluir
-                    </button>
-                </div>
+                <button class="btn-excluir-historico" onclick="excluirValeHistorico(${index})">Excluir</button>
             </div>
             <div class="historico-resumo">
                 <div class="historico-resumo-item">
@@ -513,28 +440,6 @@ function renderizarValeHistorico() {
     `).join('');
 }
 
-function reabrirValeHistorico(index) {
-    const mes = valeHistorico[index];
-    indiceValeReaberto = index;
-
-    const confirmar = confirm(
-        `Reabrir ${mes.mes} do vale alimentação? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
-    );
-    if (!confirmar) return;
-
-    // Aqui vamos restaurar apenas as compras; recargas você pode recadastrar ou ajustar a lógica depois
-    valeRecargas = [];
-    valeCompras = mes.compras.map(c => ({ ...c }));
-
-    renderizarCompras();
-    atualizarValeResumo();
-    atualizarValeMesAtual();
-
-    salvarDados();
-
-    alert(`Mês do vale ${mes.mes} reaberto para edição.`);
-}
-
 function excluirValeHistorico(index) {
     const confirmar = confirm('Deseja realmente excluir este mês do histórico?');
     if (!confirmar) return;
@@ -554,6 +459,7 @@ function fecharMesVale() {
     }
 
     const confirmar = confirm('Deseja fechar o mês do vale alimentação e salvar no histórico? Os dados atuais serão zerados.');
+    
     if (!confirmar) return;
 
     const saldo = totalRecarga - totalGasto;
@@ -571,13 +477,7 @@ function fecharMesVale() {
         compras: [...valeCompras]
     };
 
-    if (indiceValeReaberto === null) {
-        valeHistorico.unshift(mesHistorico);
-    } else {
-        valeHistorico[indiceValeReaberto] = mesHistorico;
-    }
-
-    indiceValeReaberto = null;
+    valeHistorico.unshift(mesHistorico);
 
     valeRecargas = [];
     valeCompras = [];
@@ -612,6 +512,7 @@ function adicionarCompraFutura() {
         dataFormatada: data.toLocaleDateString('pt-BR')
     });
     
+    // Ordenar por data (mais próximas primeiro)
     comprasFuturas.sort((a, b) => new Date(a.data) - new Date(b.data));
     
     document.getElementById('nome-futura').value = '';
