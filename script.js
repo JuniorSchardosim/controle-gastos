@@ -164,6 +164,31 @@ function mudarAba(aba) {
     }
 }
 
+// FUNÇÕES DE NAVEGAÇÃO DE MÊS
+function voltarMes() {
+    mesAtualData.setMonth(mesAtualData.getMonth() - 1);
+    atualizarMesAtual();
+    atualizarValeMesAtual();
+    salvarDados();
+    console.log('Voltou para:', mesAtualData);
+}
+
+function avancarMes() {
+    mesAtualData.setMonth(mesAtualData.getMonth() + 1);
+    atualizarMesAtual();
+    atualizarValeMesAtual();
+    salvarDados();
+    console.log('Avançou para:', mesAtualData);
+}
+
+function irParaMesAtual() {
+    mesAtualData = new Date();
+    atualizarMesAtual();
+    atualizarValeMesAtual();
+    salvarDados();
+    alert('Voltou para o mês atual!');
+}
+
 document.getElementById('salario').addEventListener('input', function() {
     atualizarResumo();
     salvarDados();
@@ -342,7 +367,14 @@ function renderizarHistorico() {
         <div class="historico-item">
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
-                <button class="btn-excluir-historico" onclick="excluirHistorico(${index})">Excluir</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirHistorico(${index})">
+                        🔄 Reabrir
+                    </button>
+                    <button class="btn-excluir-historico" onclick="excluirHistorico(${index})">
+                        🗑️ Excluir
+                    </button>
+                </div>
             </div>
             <div class="historico-resumo">
                 <div class="historico-resumo-item">
@@ -371,13 +403,41 @@ function renderizarHistorico() {
     `).join('');
 }
 
-function excluirHistorico(index) {
-    const confirmar = confirm('Deseja realmente excluir este mês do histórico?');
+function reabrirHistorico(index) {
+    const mes = historico[index];
+
+    const confirmar = confirm(
+        `Reabrir ${mes.mes}? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
+    );
     if (!confirmar) return;
 
+    document.getElementById('salario').value = mes.salario.toFixed(2);
+    despesas = mes.despesas.map(d => ({ ...d }));
+
+    // Extrair o mês e ano do histórico
+    const partes = mes.mes.split(' de ');
+    if (partes.length === 2) {
+        const nomeMes = partes[0];
+        const ano = parseInt(partes[1], 10);
+        const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const idxMes = mesesNomes.indexOf(nomeMes);
+        if (idxMes !== -1 && !isNaN(ano)) {
+            mesAtualData = new Date(ano, idxMes, 1);
+        }
+    }
+
+    // Remover do histórico
     historico.splice(index, 1);
+
+    renderizarDespesas();
+    atualizarResumo();
     renderizarHistorico();
+    atualizarMesAtual();
+    atualizarValeMesAtual();
     salvarDados();
+
+    alert(`Mês ${mes.mes} reaberto para edição.`);
 }
 
 // FUNÇÕES VALE ALIMENTAÇÃO
@@ -479,7 +539,14 @@ function renderizarValeHistorico() {
         <div class="historico-item">
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
-                <button class="btn-excluir-historico" onclick="excluirValeHistorico(${index})">Excluir</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirValeHistorico(${index})">
+                        🔄 Reabrir
+                    </button>
+                    <button class="btn-excluir-historico" onclick="excluirValeHistorico(${index})">
+                        🗑️ Excluir
+                    </button>
+                </div>
             </div>
             <div class="historico-resumo">
                 <div class="historico-resumo-item">
@@ -508,13 +575,41 @@ function renderizarValeHistorico() {
     `).join('');
 }
 
-function excluirValeHistorico(index) {
-    const confirmar = confirm('Deseja realmente excluir este mês do histórico?');
+function reabrirValeHistorico(index) {
+    const mes = valeHistorico[index];
+
+    const confirmar = confirm(
+        `Reabrir ${mes.mes} do vale alimentação? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
+    );
     if (!confirmar) return;
 
+    valeRecargas = [];
+    valeCompras = mes.compras.map(c => ({ ...c }));
+
+    // Extrair o mês e ano do histórico
+    const partes = mes.mes.split(' de ');
+    if (partes.length === 2) {
+        const nomeMes = partes[0];
+        const ano = parseInt(partes[1], 10);
+        const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const idxMes = mesesNomes.indexOf(nomeMes);
+        if (idxMes !== -1 && !isNaN(ano)) {
+            mesAtualData = new Date(ano, idxMes, 1);
+        }
+    }
+
+    // Remover do histórico
     valeHistorico.splice(index, 1);
+
+    renderizarCompras();
+    atualizarValeResumo();
     renderizarValeHistorico();
+    atualizarMesAtual();
+    atualizarValeMesAtual();
     salvarDados();
+
+    alert(`Mês do vale ${mes.mes} reaberto para edição.`);
 }
 
 function fecharMesVale() {
@@ -636,4 +731,3 @@ function atualizarFuturasResumo() {
     const total = comprasFuturas.reduce((sum, c) => sum + c.valor, 0);
     document.getElementById('total-futuras').textContent = `R$ ${total.toFixed(2)}`;
 }
-
