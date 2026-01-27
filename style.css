@@ -125,6 +125,39 @@ h1 {
     transform: translateY(0);
 }
 
+.navegacao-mes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #2a2a2a;
+}
+
+.btn-nav-mes {
+    background: #1a1a1a;
+    color: #64ffda;
+    border: 2px solid #2a2a2a;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85em;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.btn-nav-mes:hover {
+    background: #2a2a2a;
+    border-color: #64ffda;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 255, 218, 0.2);
+}
+
+.btn-nav-mes:active {
+    transform: translateY(0);
+}
+
 .salario-section {
     background: #1a1a1a;
     padding: 25px;
