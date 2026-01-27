@@ -636,3 +636,4 @@ function atualizarFuturasResumo() {
     const total = comprasFuturas.reduce((sum, c) => sum + c.valor, 0);
     document.getElementById('total-futuras').textContent = `R$ ${total.toFixed(2)}`;
 }
+
