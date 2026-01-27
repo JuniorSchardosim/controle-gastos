@@ -95,6 +95,16 @@ function setupListeners() {
                 atualizarFuturasResumo();
             }
             
+            if (JSON.stringify(dados.historico) !== JSON.stringify(historico)) {
+                historico = dados.historico || [];
+                renderizarHistorico();
+            }
+            
+            if (JSON.stringify(dados.valeHistorico) !== JSON.stringify(valeHistorico)) {
+                valeHistorico = dados.valeHistorico || [];
+                renderizarValeHistorico();
+            }
+            
             if (dados.mesAtualData) {
                 const novaData = new Date(dados.mesAtualData);
                 if (novaData.getTime() !== mesAtualData.getTime()) {
