@@ -195,14 +195,7 @@ function avancarMes() {
     console.log('Avançou para:', mesAtualData);
 }
 
-function irParaMesAtual() {
-    console.log('Indo para mês atual...');
-    mesAtualData = new Date();
-    atualizarMesAtual();
-    atualizarValeMesAtual();
-    salvarDados();
-    alert('Voltou para o mês atual!');
-}
+
 
 document.getElementById('salario').addEventListener('input', function() {
     atualizarResumo();
