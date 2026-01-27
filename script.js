@@ -247,6 +247,9 @@ function atualizarResumo() {
 }
 
 function fecharMes() {
+    console.log('=== INICIANDO FECHAMENTO DO MÊS ===');
+    console.log('Mês ANTES de fechar:', mesAtualData);
+    
     const salario = parseFloat(document.getElementById('salario').value) || 0;
     
     if (salario === 0 && despesas.length === 0) {
@@ -255,13 +258,18 @@ function fecharMes() {
     }
 
     const confirmar = confirm('Deseja fechar o mês atual e salvar no histórico? Os dados atuais serão zerados.');
-    if (!confirmar) return;
+    if (!confirmar) {
+        console.log('Usuário cancelou');
+        return;
+    }
 
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
     const saldo = salario - totalDespesas;
 
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    
+    console.log('Mês sendo salvo no histórico:', meses[mesAtualData.getMonth()], mesAtualData.getFullYear());
     
     const mesHistorico = {
         mes: `${meses[mesAtualData.getMonth()]} de ${mesAtualData.getFullYear()}`,
@@ -292,14 +300,26 @@ function fecharMes() {
     document.getElementById('salario').value = '';
     
     // AVANÇAR O MÊS
+    console.log('Avançando mês...');
+    const mesAntes = mesAtualData.getMonth();
+    const anoAntes = mesAtualData.getFullYear();
+    
     mesAtualData.setMonth(mesAtualData.getMonth() + 1);
-    console.log('Novo mês:', mesAtualData);
+    
+    const mesDepois = mesAtualData.getMonth();
+    const anoDepois = mesAtualData.getFullYear();
+    
+    console.log('Mês ANTES:', meses[mesAntes], anoAntes);
+    console.log('Mês DEPOIS:', meses[mesDepois], anoDepois);
+    console.log('mesAtualData após setMonth:', mesAtualData);
     
     atualizarMesAtual();
     atualizarValeMesAtual();
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
+    
+    console.log('Salvando dados no Firebase...');
     salvarDados();
 
     const mensagemFixas = despesasProximoMes.length > 0 
@@ -307,6 +327,7 @@ function fecharMes() {
         : '';
 
     alert('Mês fechado e salvo no histórico com sucesso!' + mensagemFixas);
+    console.log('=== FECHAMENTO CONCLUÍDO ===');
 }
 
 function renderizarHistorico() {
