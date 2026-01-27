@@ -195,33 +195,21 @@ function renderizarDespesas() {
         return;
     }
 
-    lista.innerHTML = despesas.map((despesa, index) => {
-        let infoExtra = '';
-        
-        if (despesa.fixa) {
-            infoExtra = 'Despesa fixa - repete todos os meses';
-        } else if (despesa.meses > 1) {
-            infoExtra = `Faltam ${despesa.meses} parcela(s)`;
-        } else if (despesa.meses === 1) {
-            infoExtra = 'Última parcela';
-        } else {
-            infoExtra = 'Pagamento único';
-        }
-        
-        return `
-            <div class="despesa-item">
-                <div class="despesa-info">
-                    <div class="despesa-nome">
-                        ${despesa.nome}
-                        ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
-                    </div>
-                    <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
-                    <div class="despesa-info-extra">${infoExtra}</div>
+    lista.innerHTML = despesas.map((despesa, index) => `
+        <div class="despesa-item">
+            <div class="despesa-info">
+                <div class="despesa-nome">
+                    ${despesa.nome}
+                    ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
                 </div>
-                <button class="btn-remover" onclick="removerDespesa(${index})">Remover</button>
+                <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
+                <div class="despesa-info-extra">
+                    ${despesa.meses > 1 ? `Parcelado em ${despesa.meses}x` : 'Pagamento único'}
+                </div>
             </div>
-        `;
-    }).join('');
+            <button class="btn-remover" onclick="removerDespesa(${index})">Remover</button>
+        </div>
+    `).join('');
 }
 
 function atualizarResumo() {
