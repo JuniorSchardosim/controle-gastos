@@ -4,6 +4,7 @@ let valeRecargas = [];
 let valeCompras = [];
 let valeHistorico = [];
 let comprasFuturas = [];
+let mesAtualData = new Date();
 
 // Esperar Firebase carregar
 setTimeout(inicializar, 1000);
@@ -21,12 +22,15 @@ function inicializar() {
 
 async function carregarDados() {
     try {
-        // Carregar dados do Firebase
         const docRef = window.firestore.doc(window.db, 'dados', 'principal');
         const docSnap = await window.firestore.getDoc(docRef);
         
         if (docSnap.exists()) {
             const dados = docSnap.data();
+            
+            if (dados.mesAtualData) {
+                mesAtualData = new Date(dados.mesAtualData);
+            }
             
             if (dados.salario) {
                 document.getElementById('salario').value = dados.salario;
@@ -68,13 +72,11 @@ async function carregarDados() {
 }
 
 function setupListeners() {
-    // Listener em tempo real para sincronização
     const docRef = window.firestore.doc(window.db, 'dados', 'principal');
     window.firestore.onSnapshot(docRef, (doc) => {
         if (doc.exists()) {
             const dados = doc.data();
             
-            // Atualizar apenas se houver mudanças
             if (JSON.stringify(dados.despesas) !== JSON.stringify(despesas)) {
                 despesas = dados.despesas || [];
                 renderizarDespesas();
@@ -92,6 +94,15 @@ function setupListeners() {
                 renderizarComprasFuturas();
                 atualizarFuturasResumo();
             }
+            
+            if (dados.mesAtualData) {
+                const novaData = new Date(dados.mesAtualData);
+                if (novaData.getTime() !== mesAtualData.getTime()) {
+                    mesAtualData = novaData;
+                    atualizarMesAtual();
+                    atualizarValeMesAtual();
+                }
+            }
         }
     });
 }
@@ -107,8 +118,10 @@ async function salvarDados() {
             valeCompras: valeCompras,
             valeHistorico: valeHistorico,
             comprasFuturas: comprasFuturas,
+            mesAtualData: mesAtualData.toISOString(),
             ultimaAtualizacao: new Date().toISOString()
         });
+        console.log('Dados salvos com sucesso! Mês atual:', mesAtualData);
     } catch (error) {
         console.error('Erro ao salvar dados:', error);
         alert('Erro ao salvar dados. Tente novamente.');
@@ -118,18 +131,17 @@ async function salvarDados() {
 function atualizarMesAtual() {
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const data = new Date();
-    const mesAtual = meses[data.getMonth()];
-    const anoAtual = data.getFullYear();
+    const mesAtual = meses[mesAtualData.getMonth()];
+    const anoAtual = mesAtualData.getFullYear();
     document.getElementById('mes-atual-nome').textContent = `${mesAtual} de ${anoAtual}`;
+    console.log('Mês atualizado para:', mesAtual, anoAtual);
 }
 
 function atualizarValeMesAtual() {
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const data = new Date();
-    const mesAtual = meses[data.getMonth()];
-    const anoAtual = data.getFullYear();
+    const mesAtual = meses[mesAtualData.getMonth()];
+    const anoAtual = mesAtualData.getFullYear();
     document.getElementById('vale-mes-atual').textContent = `${mesAtual} de ${anoAtual}`;
 }
 
@@ -195,21 +207,33 @@ function renderizarDespesas() {
         return;
     }
 
-    lista.innerHTML = despesas.map((despesa, index) => `
-        <div class="despesa-item">
-            <div class="despesa-info">
-                <div class="despesa-nome">
-                    ${despesa.nome}
-                    ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
+    lista.innerHTML = despesas.map((despesa, index) => {
+        let infoExtra = '';
+        
+        if (despesa.fixa) {
+            infoExtra = 'Despesa fixa - repete todos os meses';
+        } else if (despesa.meses > 1) {
+            infoExtra = `Faltam ${despesa.meses} parcela(s)`;
+        } else if (despesa.meses === 1) {
+            infoExtra = 'Última parcela';
+        } else {
+            infoExtra = 'Pagamento único';
+        }
+        
+        return `
+            <div class="despesa-item">
+                <div class="despesa-info">
+                    <div class="despesa-nome">
+                        ${despesa.nome}
+                        ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
+                    </div>
+                    <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
+                    <div class="despesa-info-extra">${infoExtra}</div>
                 </div>
-                <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
-                <div class="despesa-info-extra">
-                    ${despesa.meses > 1 ? `Parcelado em ${despesa.meses}x` : 'Pagamento único'}
-                </div>
+                <button class="btn-remover" onclick="removerDespesa(${index})">Remover</button>
             </div>
-            <button class="btn-remover" onclick="removerDespesa(${index})">Remover</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function atualizarResumo() {
@@ -231,19 +255,17 @@ function fecharMes() {
     }
 
     const confirmar = confirm('Deseja fechar o mês atual e salvar no histórico? Os dados atuais serão zerados.');
-    
     if (!confirmar) return;
 
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
     const saldo = salario - totalDespesas;
 
-    const data = new Date();
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     
     const mesHistorico = {
-        mes: `${meses[data.getMonth()]} de ${data.getFullYear()}`,
-        data: data.toISOString(),
+        mes: `${meses[mesAtualData.getMonth()]} de ${mesAtualData.getFullYear()}`,
+        data: mesAtualData.toISOString(),
         salario: salario,
         despesas: [...despesas],
         totalDespesas: totalDespesas,
@@ -257,20 +279,24 @@ function fecharMes() {
     
     despesas.forEach(despesa => {
         if (despesa.fixa) {
-            // Despesa fixa: mantém para sempre
             despesasProximoMes.push({ ...despesa });
         } else if (despesa.meses > 1) {
-            // Despesa parcelada: diminui o contador
             despesasProximoMes.push({
                 ...despesa,
                 meses: despesa.meses - 1
             });
         }
-        // Se não é fixa nem tem mais parcelas, não adiciona ao próximo mês
     });
 
     despesas = despesasProximoMes;
     document.getElementById('salario').value = '';
+    
+    // AVANÇAR O MÊS
+    mesAtualData.setMonth(mesAtualData.getMonth() + 1);
+    console.log('Novo mês:', mesAtualData);
+    
+    atualizarMesAtual();
+    atualizarValeMesAtual();
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
@@ -480,18 +506,16 @@ function fecharMesVale() {
     }
 
     const confirmar = confirm('Deseja fechar o mês do vale alimentação e salvar no histórico? Os dados atuais serão zerados.');
-    
     if (!confirmar) return;
 
     const saldo = totalRecarga - totalGasto;
 
-    const data = new Date();
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     
     const mesHistorico = {
-        mes: `${meses[data.getMonth()]} de ${data.getFullYear()}`,
-        data: data.toISOString(),
+        mes: `${meses[mesAtualData.getMonth()]} de ${mesAtualData.getFullYear()}`,
+        data: mesAtualData.toISOString(),
         totalRecarga: totalRecarga,
         totalGasto: totalGasto,
         saldo: saldo,
@@ -503,6 +527,13 @@ function fecharMesVale() {
     valeRecargas = [];
     valeCompras = [];
     document.getElementById('vale-recarga').value = '';
+    
+    // AVANÇAR O MÊS
+    mesAtualData.setMonth(mesAtualData.getMonth() + 1);
+    console.log('Novo mês (vale):', mesAtualData);
+    
+    atualizarMesAtual();
+    atualizarValeMesAtual();
     renderizarCompras();
     atualizarValeResumo();
     renderizarValeHistorico();
@@ -533,7 +564,6 @@ function adicionarCompraFutura() {
         dataFormatada: data.toLocaleDateString('pt-BR')
     });
     
-    // Ordenar por data (mais próximas primeiro)
     comprasFuturas.sort((a, b) => new Date(a.data) - new Date(b.data));
     
     document.getElementById('nome-futura').value = '';
@@ -585,4 +615,3 @@ function atualizarFuturasResumo() {
     const total = comprasFuturas.reduce((sum, c) => sum + c.valor, 0);
     document.getElementById('total-futuras').textContent = `R$ ${total.toFixed(2)}`;
 }
-
