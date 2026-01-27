@@ -6,26 +6,26 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #0a0e27;
+    background: #000000;
     min-height: 100vh;
     padding: 0;
     color: #e0e0e0;
 }
 
 .tabs {
-    background: #1a1f3a;
+    background: #0d0d0d;
     padding: 20px;
     display: flex;
     justify-content: center;
     gap: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
 }
 
 .tab-btn {
     padding: 15px 40px;
-    background: #252b4a;
+    background: #1a1a1a;
     color: #e0e0e0;
-    border: 2px solid #3a4270;
+    border: 2px solid #2a2a2a;
     border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
@@ -34,7 +34,7 @@ body {
 }
 
 .tab-btn:hover {
-    background: #3a4270;
+    background: #2a2a2a;
     transform: translateY(-2px);
 }
 
@@ -56,9 +56,9 @@ body {
 .container {
     max-width: 900px;
     margin: 0 auto;
-    background: #1a1f3a;
+    background: #0d0d0d;
     border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
     padding: 40px;
 }
 
@@ -126,11 +126,11 @@ h1 {
 }
 
 .salario-section {
-    background: #252b4a;
+    background: #1a1a1a;
     padding: 25px;
     border-radius: 15px;
     margin-bottom: 30px;
-    border: 1px solid #3a4270;
+    border: 1px solid #2a2a2a;
 }
 
 .salario-section label {
@@ -144,8 +144,8 @@ h1 {
 .salario-section input {
     width: 100%;
     padding: 12px;
-    border: 2px solid #3a4270;
-    background: #1a1f3a;
+    border: 2px solid #2a2a2a;
+    background: #0d0d0d;
     color: #e0e0e0;
     border-radius: 8px;
     font-size: 1.2em;
@@ -181,8 +181,8 @@ h1 {
     flex: 1;
     min-width: 150px;
     padding: 12px;
-    border: 2px solid #3a4270;
-    background: #252b4a;
+    border: 2px solid #2a2a2a;
+    background: #1a1a1a;
     color: #e0e0e0;
     border-radius: 8px;
     font-size: 1em;
@@ -197,8 +197,8 @@ h1 {
     align-items: center;
     gap: 8px;
     padding: 12px;
-    background: #252b4a;
-    border: 2px solid #3a4270;
+    background: #1a1a1a;
+    border: 2px solid #2a2a2a;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
@@ -240,23 +240,23 @@ h1 {
 }
 
 .lista-despesas {
-    background: #252b4a;
+    background: #1a1a1a;
     border-radius: 10px;
     padding: 15px;
     max-height: 300px;
     overflow-y: auto;
-    border: 1px solid #3a4270;
+    border: 1px solid #2a2a2a;
 }
 
 .despesa-item {
-    background: #1a1f3a;
+    background: #0d0d0d;
     padding: 15px;
     margin-bottom: 10px;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid #3a4270;
+    border: 1px solid #2a2a2a;
 }
 
 .despesa-info {
@@ -307,10 +307,10 @@ h1 {
 }
 
 .resumo {
-    background: #252b4a;
+    background: #1a1a1a;
     padding: 25px;
     border-radius: 15px;
-    border: 1px solid #3a4270;
+    border: 1px solid #2a2a2a;
     margin-bottom: 30px;
 }
 
@@ -324,7 +324,7 @@ h1 {
 .resumo-item:last-child {
     margin-bottom: 0;
     padding-top: 15px;
-    border-top: 2px solid #3a4270;
+    border-top: 2px solid #2a2a2a;
     font-size: 1.5em;
     font-weight: bold;
 }
@@ -339,10 +339,10 @@ h1 {
 }
 
 .historico-section {
-    background: #252b4a;
+    background: #1a1a1a;
     padding: 25px;
     border-radius: 15px;
-    border: 1px solid #3a4270;
+    border: 1px solid #2a2a2a;
 }
 
 .historico-section h2 {
@@ -357,11 +357,11 @@ h1 {
 }
 
 .historico-item {
-    background: #1a1f3a;
+    background: #0d0d0d;
     padding: 20px;
     margin-bottom: 15px;
     border-radius: 10px;
-    border: 1px solid #3a4270;
+    border: 1px solid #2a2a2a;
 }
 
 .historico-header {
@@ -370,7 +370,7 @@ h1 {
     align-items: center;
     margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #3a4270;
+    border-bottom: 1px solid #2a2a2a;
 }
 
 .historico-mes {
@@ -402,7 +402,7 @@ h1 {
 }
 
 .historico-despesas {
-    background: #0f1326;
+    background: #000000;
     padding: 15px;
     border-radius: 8px;
     max-height: 200px;
@@ -419,7 +419,7 @@ h1 {
     display: flex;
     justify-content: space-between;
     padding: 8px 0;
-    border-bottom: 1px solid #252b4a;
+    border-bottom: 1px solid #1a1a1a;
 }
 
 .historico-despesa-item:last-child {
@@ -450,7 +450,7 @@ h1 {
 .lista-despesas::-webkit-scrollbar-track,
 .historico-lista::-webkit-scrollbar-track,
 .historico-despesas::-webkit-scrollbar-track {
-    background: #1a1f3a;
+    background: #0d0d0d;
     border-radius: 10px;
 }
 
@@ -468,11 +468,11 @@ h1 {
 }
 
 .vale-saldo-section {
-    background: #252b4a;
+    background: #1a1a1a;
     padding: 25px;
     border-radius: 15px;
     margin-bottom: 30px;
-    border: 1px solid #3a4270;
+    border: 1px solid #2a2a2a;
 }
 
 .vale-input-group {
@@ -493,8 +493,8 @@ h1 {
     flex: 1;
     min-width: 200px;
     padding: 12px;
-    border: 2px solid #3a4270;
-    background: #1a1f3a;
+    border: 2px solid #2a2a2a;
+    background: #0d0d0d;
     color: #e0e0e0;
     border-radius: 8px;
     font-size: 1.2em;
@@ -532,8 +532,8 @@ h1 {
 
 select {
     padding: 12px;
-    border: 2px solid #3a4270;
-    background: #252b4a;
+    border: 2px solid #2a2a2a;
+    background: #1a1a1a;
     color: #e0e0e0;
     border-radius: 8px;
     font-size: 1em;
@@ -547,6 +547,6 @@ select:focus {
 }
 
 select option {
-    background: #252b4a;
+    background: #1a1a1a;
     color: #e0e0e0;
 }
