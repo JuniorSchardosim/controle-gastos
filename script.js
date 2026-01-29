@@ -4,6 +4,7 @@ let valeRecargas = [];
 let valeCompras = [];
 let valeHistorico = [];
 let comprasFuturas = [];
+let itensCompras = [];
 let mesAtualData = new Date(); // Data para Despesas Mensais
 let valeMesAtualData = new Date(); // Data para Vale Alimentação
 
@@ -62,6 +63,10 @@ async function carregarDados() {
                 comprasFuturas = dados.comprasFuturas;
                 renderizarComprasFuturas();
             }
+            if (dados.itensCompras) {
+                itensCompras = dados.itensCompras;
+                renderizarItensCompras();
+            }
         }
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -73,6 +78,7 @@ async function carregarDados() {
     atualizarFuturasResumo();
     atualizarMesAtual();
     atualizarValeMesAtual();
+    atualizarResumoCompras();
 }
 
 function setupListeners() {
@@ -108,6 +114,12 @@ function setupListeners() {
                 valeHistorico = dados.valeHistorico || [];
                 renderizarValeHistorico();
             }
+
+            if (JSON.stringify(dados.itensCompras) !== JSON.stringify(itensCompras)) {
+                itensCompras = dados.itensCompras || [];
+                renderizarItensCompras();
+                atualizarResumoCompras();
+            }
             
             if (dados.mesAtualData) {
                 const novaData = new Date(dados.mesAtualData);
@@ -139,6 +151,7 @@ async function salvarDados() {
             valeCompras: valeCompras,
             valeHistorico: valeHistorico,
             comprasFuturas: comprasFuturas,
+            itensCompras: itensCompras,
             mesAtualData: mesAtualData.toISOString(),
             valeMesAtualData: valeMesAtualData.toISOString(),
             ultimaAtualizacao: new Date().toISOString()
@@ -177,9 +190,12 @@ function mudarAba(aba) {
     } else if (aba === 'vale') {
         document.getElementById('aba-vale').classList.add('active');
         botoes[1].classList.add('active');
+    } else if (aba === 'supermercado') {
+        document.getElementById('aba-supermercado').classList.add('active');
+        botoes[2].classList.add('active');
     } else if (aba === 'futuras') {
         document.getElementById('aba-futuras').classList.add('active');
-        botoes[2].classList.add('active');
+        botoes[3].classList.add('active');
     }
 }
 
@@ -290,49 +306,35 @@ function atualizarResumo() {
 }
 
 function fecharMes() {
-    const salario = parseFloat(document.getElementById('salario').value) || 0;
-    if (salario === 0 && despesas.length === 0) {
-        alert('Adicione pelo menos o salário ou alguma despesa antes de fechar o mês.');
-        return;
-    }
+    if (!confirm('Tem certeza que deseja fechar este mês?')) return;
 
-    const confirmar = confirm('Deseja fechar o mês atual e salvar no histórico? Os dados atuais serão zerados.');
-    if (!confirmar) return;
-
-    const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
-    const saldo = salario - totalDespesas;
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    
-    const mesHistorico = {
-        mes: `${meses[mesAtualData.getMonth()]} de ${mesAtualData.getFullYear()}`,
-        data: mesAtualData.toISOString(),
+    const mesAtual = meses[mesAtualData.getMonth()];
+    const anoAtual = mesAtualData.getFullYear();
+    const salario = parseFloat(document.getElementById('salario').value) || 0;
+    const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
+    const saldo = salario - totalDespesas;
+
+    historico.push({
+        mes: `${mesAtual} de ${anoAtual}`,
         salario: salario,
-        despesas: [...despesas],
+        despesas: despesas.map(d => ({ ...d })),
         totalDespesas: totalDespesas,
         saldo: saldo
-    };
-
-    historico.unshift(mesHistorico);
-
-    const despesasProximoMes = [];
-    despesas.forEach(despesa => {
-        if (despesa.fixa) despesasProximoMes.push({ ...despesa });
-        else if (despesa.meses > 1) despesasProximoMes.push({ ...despesa, meses: despesa.meses - 1 });
     });
 
-    despesas = despesasProximoMes;
+    despesas = [];
     document.getElementById('salario').value = '';
-    
+    mesAtualData = new Date(mesAtualData);
     mesAtualData.setMonth(mesAtualData.getMonth() + 1);
-    
+
     atualizarMesAtual();
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
     salvarDados();
-
-    alert('Mês de despesas fechado com sucesso!');
+    alert('Mês fechado com sucesso!');
 }
 
 function renderizarHistorico() {
@@ -347,8 +349,8 @@ function renderizarHistorico() {
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirHistorico(${index})">🔄 Reabrir</button>
-                    <button class="btn-remover" onclick="excluirHistorico(${index})">🗑️ Excluir</button>
+                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirMes(${index})">🔄 Reabrir</button>
+                    <button class="btn-remover" onclick="excluirMes(${index})">🗑️ Excluir</button>
                 </div>
             </div>
             <div class="historico-resumo">
@@ -366,25 +368,19 @@ function renderizarHistorico() {
                 </div>
             </div>
             <div class="historico-despesas">
-                <h4>Despesas do mês:</h4>
-                ${mes.despesas.map(despesa => `
-                    <div class="historico-despesa-item">
-                        <span>${despesa.nome}</span>
-                        <span style="color: #ff6b6b;">R$ ${despesa.valor.toFixed(2)}</span>
-                    </div>
-                `).join('')}
+                <h4>Despesas:</h4>
+                ${mes.despesas.map(d => `<div class="historico-despesa-item"><span>${d.nome}</span><span style="color: #ff6b6b;">R$ ${d.valor.toFixed(2)}</span></div>`).join('')}
             </div>
         </div>
     `).join('');
 }
 
-function reabrirHistorico(index) {
+function reabrirMes(index) {
     const mes = historico[index];
-    const confirmar = confirm(`Reabrir ${mes.mes}? O mês atual em edição será substituído.`);
-    if (!confirmar) return;
+    if (!confirm(`Reabrir ${mes.mes}?`)) return;
 
-    document.getElementById('salario').value = mes.salario.toFixed(2);
     despesas = mes.despesas.map(d => ({ ...d }));
+    document.getElementById('salario').value = mes.salario;
 
     const partes = mes.mes.split(' de ');
     if (partes.length === 2) {
@@ -402,8 +398,8 @@ function reabrirHistorico(index) {
     salvarDados();
 }
 
-function excluirHistorico(index) {
-    if (confirm('Excluir permanentemente este histórico?')) {
+function excluirMes(index) {
+    if (confirm('Excluir este mês do histórico?')) {
         historico.splice(index, 1);
         renderizarHistorico();
         salvarDados();
@@ -413,9 +409,13 @@ function excluirHistorico(index) {
 // VALE ALIMENTAÇÃO
 function adicionarRecarga() {
     const valor = parseFloat(document.getElementById('vale-recarga').value);
-    if (isNaN(valor) || valor <= 0) return;
+    
+    if (isNaN(valor) || valor <= 0) {
+        alert('Por favor, insira um valor válido.');
+        return;
+    }
 
-    valeRecargas.push({ valor, data: new Date().toISOString(), dataFormatada: new Date().toLocaleDateString('pt-BR') });
+    valeRecargas.push({ valor, data: new Date().toISOString() });
     document.getElementById('vale-recarga').value = '';
     atualizarValeResumo();
     salvarDados();
@@ -426,10 +426,12 @@ function adicionarCompra() {
     const valor = parseFloat(document.getElementById('valor-compra').value);
     const dataInput = document.getElementById('data-compra').value;
 
-    if (!nome || isNaN(valor) || valor <= 0) return;
+    if (!nome || isNaN(valor) || valor <= 0 || !dataInput) {
+        alert('Por favor, preencha todos os campos corretamente.');
+        return;
+    }
 
-    const data = dataInput ? new Date(dataInput + 'T12:00:00') : new Date();
-    valeCompras.push({ nome, valor, data: data.toISOString(), dataFormatada: data.toLocaleDateString('pt-BR') });
+    valeCompras.push({ nome, valor, data: dataInput });
     
     document.getElementById('nome-compra').value = '';
     document.getElementById('valor-compra').value = '';
@@ -449,54 +451,59 @@ function removerCompra(index) {
 
 function renderizarCompras() {
     const lista = document.getElementById('lista-compras');
+    
     if (valeCompras.length === 0) {
         lista.innerHTML = '<p class="vazio">Nenhuma compra adicionada</p>';
         return;
     }
 
-    lista.innerHTML = valeCompras.map((compra, index) => `
-        <div class="despesa-item">
-            <div class="despesa-info">
-                <div class="despesa-nome">${compra.nome}</div>
-                <div class="despesa-valor">R$ ${compra.valor.toFixed(2)}</div>
-                <div class="despesa-info-extra">${compra.dataFormatada}</div>
+    lista.innerHTML = valeCompras.map((compra, index) => {
+        const data = new Date(compra.data).toLocaleDateString('pt-BR');
+        return `
+            <div class="despesa-item">
+                <div class="despesa-info">
+                    <div class="despesa-nome">${compra.nome}</div>
+                    <div class="despesa-valor">R$ ${compra.valor.toFixed(2)}</div>
+                    <div class="despesa-info-extra">📅 ${data}</div>
+                </div>
+                <button class="btn-remover" onclick="removerCompra(${index})">Remover</button>
             </div>
-            <button class="btn-remover" onclick="removerCompra(${index})">Remover</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function atualizarValeResumo() {
-    const totalRecarga = valeRecargas.reduce((total, r) => total + r.valor, 0);
-    const totalGasto = valeCompras.reduce((total, c) => total + c.valor, 0);
+    const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
+    const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
+    const saldo = totalRecarga - totalGasto;
+
     document.getElementById('vale-total-recarga').textContent = `R$ ${totalRecarga.toFixed(2)}`;
     document.getElementById('vale-total-gasto').textContent = `R$ ${totalGasto.toFixed(2)}`;
-    document.getElementById('vale-saldo').textContent = `R$ ${(totalRecarga - totalGasto).toFixed(2)}`;
+    document.getElementById('vale-saldo').textContent = `R$ ${saldo.toFixed(2)}`;
 }
 
 function fecharMesVale() {
-    const totalRecarga = valeRecargas.reduce((total, r) => total + r.valor, 0);
-    const totalGasto = valeCompras.reduce((total, c) => total + c.valor, 0);
-    
-    if (totalRecarga === 0 && valeCompras.length === 0) {
-        alert('Adicione dados antes de fechar o mês do vale.');
-        return;
-    }
-
-    if (!confirm('Fechar o mês do vale alimentação?')) return;
+    if (!confirm('Tem certeza que deseja fechar este mês do vale?')) return;
 
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    
-    valeHistorico.unshift({
-        mes: `${meses[valeMesAtualData.getMonth()]} de ${valeMesAtualData.getFullYear()}`,
-        data: valeMesAtualData.toISOString(),
-        totalRecarga, totalGasto, saldo: totalRecarga - totalGasto,
-        compras: [...valeCompras]
+    const mesAtual = meses[valeMesAtualData.getMonth()];
+    const anoAtual = valeMesAtualData.getFullYear();
+    const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
+    const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
+    const saldo = totalRecarga - totalGasto;
+
+    valeHistorico.push({
+        mes: `${mesAtual} de ${anoAtual}`,
+        totalRecarga: totalRecarga,
+        totalGasto: totalGasto,
+        saldo: saldo,
+        compras: valeCompras.map(c => ({ ...c }))
     });
 
     valeRecargas = [];
     valeCompras = [];
+    valeMesAtualData = new Date(valeMesAtualData);
     valeMesAtualData.setMonth(valeMesAtualData.getMonth() + 1);
     
     atualizarValeMesAtual();
@@ -628,6 +635,121 @@ function atualizarFuturasResumo() {
     document.getElementById('total-futuras').textContent = `R$ ${total.toFixed(2)}`;
 }
 
+// LISTA DE COMPRAS SUPERMERCADO
+function adicionarItemCompra() {
+    const nome = document.getElementById('nome-item-compra').value.trim();
+    const quantidade = parseFloat(document.getElementById('quantidade-item').value);
+    const categoria = document.getElementById('categoria-item').value;
 
+    if (!nome || isNaN(quantidade) || quantidade <= 0) {
+        alert('Por favor, preencha o nome e a quantidade corretamente.');
+        return;
+    }
 
+    itensCompras.push({
+        id: Date.now(),
+        nome,
+        quantidade,
+        categoria,
+        coletado: false
+    });
 
+    document.getElementById('nome-item-compra').value = '';
+    document.getElementById('quantidade-item').value = '';
+    document.getElementById('categoria-item').value = 'alimentos';
+
+    renderizarItensCompras();
+    atualizarResumoCompras();
+    salvarDados();
+}
+
+function marcarItemColetado(id) {
+    const item = itensCompras.find(i => i.id === id);
+    if (item) {
+        item.coletado = !item.coletado;
+        renderizarItensCompras();
+        atualizarResumoCompras();
+        salvarDados();
+    }
+}
+
+function removerItemCompra(id) {
+    itensCompras = itensCompras.filter(i => i.id !== id);
+    renderizarItensCompras();
+    atualizarResumoCompras();
+    salvarDados();
+}
+
+function renderizarItensCompras() {
+    const lista = document.getElementById('lista-compras-supermercado');
+
+    if (itensCompras.length === 0) {
+        lista.innerHTML = '<p class="vazio">Nenhum item adicionado</p>';
+        return;
+    }
+
+    // Agrupar por categoria
+    const porCategoria = {};
+    itensCompras.forEach(item => {
+        if (!porCategoria[item.categoria]) {
+            porCategoria[item.categoria] = [];
+        }
+        porCategoria[item.categoria].push(item);
+    });
+
+    const categoriaLabels = {
+        alimentos: '🥕 Alimentos',
+        bebidas: '🥤 Bebidas',
+        higiene: '🧼 Higiene e Limpeza',
+        congelados: '❄️ Congelados',
+        outros: '📦 Outros'
+    };
+
+    let html = '';
+    Object.entries(porCategoria).forEach(([categoria, items]) => {
+        html += `<div class="categoria-compras"><strong>${categoriaLabels[categoria]}</strong></div>`;
+        items.forEach(item => {
+            html += `
+                <div class="item-compra ${item.coletado ? 'coletado' : ''}">
+                    <input type="checkbox" ${item.coletado ? 'checked' : ''} onchange="marcarItemColetado(${item.id})" class="checkbox-compra">
+                    <span class="nome-item">${item.nome}</span>
+                    <span class="qtd-item">${item.quantidade}</span>
+                    <button class="btn-remover-item" onclick="removerItemCompra(${item.id})">🗑️</button>
+                </div>
+            `;
+        });
+    });
+
+    lista.innerHTML = html;
+}
+
+function atualizarResumoCompras() {
+    const totalItens = itensCompras.length;
+    const itensColetados = itensCompras.filter(i => i.coletado).length;
+    const percentual = totalItens > 0 ? Math.round((itensColetados / totalItens) * 100) : 0;
+
+    document.getElementById('total-itens').textContent = totalItens;
+    document.getElementById('itens-coletados').textContent = itensColetados;
+    document.getElementById('progresso-compras').textContent = `${percentual}%`;
+    
+    const barra = document.getElementById('barra-progresso');
+    barra.style.width = `${percentual}%`;
+}
+
+function limparListaCompras() {
+    if (confirm('Tem certeza que deseja limpar toda a lista de compras?')) {
+        itensCompras = [];
+        renderizarItensCompras();
+        atualizarResumoCompras();
+        salvarDados();
+    }
+}
+
+function resetarChecksCompras() {
+    itensCompras.forEach(item => {
+        item.coletado = false;
+    });
+    renderizarItensCompras();
+    atualizarResumoCompras();
+    salvarDados();
+}
