@@ -5,6 +5,7 @@ let valeCompras = [];
 let valeHistorico = [];
 let comprasFuturas = [];
 let itensCompras = [];
+let itensPendentes = [];
 let mesAtualData = new Date(); // Data para Despesas Mensais
 let valeMesAtualData = new Date(); // Data para Vale Alimentação
 
@@ -67,6 +68,10 @@ async function carregarDados() {
                 itensCompras = dados.itensCompras;
                 renderizarItensCompras();
             }
+            if (dados.itensPendentes) {
+                itensPendentes = dados.itensPendentes;
+                renderizarItensPendentes();
+            }
         }
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -120,6 +125,11 @@ function setupListeners() {
                 renderizarItensCompras();
                 atualizarResumoCompras();
             }
+
+            if (JSON.stringify(dados.itensPendentes) !== JSON.stringify(itensPendentes)) {
+                itensPendentes = dados.itensPendentes || [];
+                renderizarItensPendentes();
+            }
             
             if (dados.mesAtualData) {
                 const novaData = new Date(dados.mesAtualData);
@@ -152,6 +162,7 @@ async function salvarDados() {
             valeHistorico: valeHistorico,
             comprasFuturas: comprasFuturas,
             itensCompras: itensCompras,
+            itensPendentes: itensPendentes,
             mesAtualData: mesAtualData.toISOString(),
             valeMesAtualData: valeMesAtualData.toISOString(),
             ultimaAtualizacao: new Date().toISOString()
@@ -718,7 +729,10 @@ function renderizarItensCompras() {
                         <span class="nome-item">${item.nome}</span>
                     </label>
                     <span class="qtd-item">${item.quantidade}</span>
-                    <button class="btn-remover-item" onclick="removerItemCompra(${item.id})">🗑️</button>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-remover-item" title="Comprar em outro lugar" onclick="enviarParaPendentes(${item.id})" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24;">⏸️</button>
+                        <button class="btn-remover-item" onclick="removerItemCompra(${item.id})">🗑️</button>
+                    </div>
                 </div>
             `;
         });
@@ -756,4 +770,113 @@ function resetarChecksCompras() {
     renderizarItensCompras();
     atualizarResumoCompras();
     salvarDados();
+}
+
+
+// ITENS PENDENTES (COMPRAR EM OUTRO LUGAR)
+function enviarParaPendentes(id) {
+    const item = itensCompras.find(i => i.id === id);
+    if (item) {
+        // Remover da lista atual
+        itensCompras = itensCompras.filter(i => i.id !== id);
+        
+        // Adicionar aos pendentes
+        itensPendentes.push({
+            id: item.id,
+            nome: item.nome,
+            quantidade: item.quantidade,
+            categoria: item.categoria,
+            dataPendente: new Date().toISOString()
+        });
+        
+        renderizarItensCompras();
+        renderizarItensPendentes();
+        atualizarResumoCompras();
+        salvarDados();
+    }
+}
+
+function trazerDePendentes(id) {
+    const item = itensPendentes.find(i => i.id === id);
+    if (item) {
+        // Remover dos pendentes
+        itensPendentes = itensPendentes.filter(i => i.id !== id);
+        
+        // Adicionar de volta à lista
+        itensCompras.push({
+            id: item.id,
+            nome: item.nome,
+            quantidade: item.quantidade,
+            categoria: item.categoria,
+            coletado: false
+        });
+        
+        renderizarItensCompras();
+        renderizarItensPendentes();
+        atualizarResumoCompras();
+        salvarDados();
+    }
+}
+
+function removerItemPendente(id) {
+    itensPendentes = itensPendentes.filter(i => i.id !== id);
+    renderizarItensPendentes();
+    salvarDados();
+}
+
+function renderizarItensPendentes() {
+    const lista = document.getElementById('lista-pendentes-supermercado');
+
+    if (itensPendentes.length === 0) {
+        lista.innerHTML = '<p class="vazio">Nenhum item pendente</p>';
+        return;
+    }
+
+    // Agrupar por categoria
+    const porCategoria = {};
+    itensPendentes.forEach(item => {
+        if (!porCategoria[item.categoria]) {
+            porCategoria[item.categoria] = [];
+        }
+        porCategoria[item.categoria].push(item);
+    });
+
+    const categoriaLabels = {
+        'alimentos': '🥕 Alimentos',
+        'bebidas': '🥤 Bebidas',
+        'higiene': '🧼 Higiene e Limpeza',
+        'congelados': '❄️ Congelados',
+        'preco': '💰 Se estiver um bom preço compra',
+        'outros': '📦 Outros'
+    };
+
+    let html = '';
+    Object.entries(porCategoria).forEach(([categoria, items]) => {
+        const labelCategoria = categoriaLabels[categoria] || `📦 ${categoria}`;
+        html += `<div class="categoria-compras"><strong>${labelCategoria}</strong></div>`;
+        items.forEach(item => {
+            html += `
+                <div class="item-compra">
+                    <label class="label-item-compra">
+                        <span class="nome-item">${item.nome}</span>
+                    </label>
+                    <span class="qtd-item">${item.quantidade}</span>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-remover-item" title="Voltar para lista" onclick="trazerDePendentes(${item.id})" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">↩️</button>
+                        <button class="btn-remover-item" onclick="removerItemPendente(${item.id})">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+    });
+
+    lista.innerHTML = html;
+}
+
+function limparListaPendentes() {
+    if (confirm('Tem certeza que deseja limpar toda a lista de pendentes?')) {
+        itensPendentes = [];
+        renderizarItensPendentes();
+        salvarDados();
+    }
 }
