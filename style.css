@@ -67,6 +67,7 @@ h2 {
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -79,6 +80,7 @@ h2 {
     transition: all 0.3s ease;
     font-weight: 600;
     flex: 1;
+    min-width: 150px;
 }
 
 .tab-btn.active {
@@ -396,6 +398,167 @@ button {
 .prioridade-media { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
 .prioridade-baixa { background: rgba(74, 222, 128, 0.2); color: var(--success); }
 
+/* LISTA DE COMPRAS SUPERMERCADO */
+.lista-compras-container {
+    background: var(--card-bg);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.lista-compras-header {
+    display: grid;
+    grid-template-columns: 1fr 80px 100px 60px;
+    gap: 12px;
+    padding: 16px;
+    background: var(--input-bg);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.header-item { text-align: left; }
+.header-qtd { text-align: center; }
+.header-status { text-align: center; }
+.header-acao { text-align: center; }
+
+.lista-compras {
+    display: flex;
+    flex-direction: column;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.categoria-compras {
+    padding: 12px 16px;
+    background: var(--input-bg);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.item-compra {
+    display: grid;
+    grid-template-columns: 30px 1fr 80px 60px;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.2s;
+}
+
+.item-compra:hover {
+    background: rgba(56, 189, 248, 0.05);
+}
+
+.item-compra.coletado {
+    opacity: 0.6;
+    background: rgba(74, 222, 128, 0.05);
+}
+
+.item-compra.coletado .nome-item {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.checkbox-compra {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--success);
+}
+
+.nome-item {
+    color: var(--text-main);
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.qtd-item {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.btn-remover-item {
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.btn-remover-item:hover {
+    background: rgba(248, 113, 113, 0.1);
+}
+
+/* Resumo de Compras */
+.resumo-compras {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.resumo-compras .resumo-item {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.resumo-compras .resumo-valor {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+/* Barra de Progresso */
+.barra-progresso {
+    width: 100%;
+    height: 8px;
+    background: var(--input-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin: 15px 0;
+}
+
+.barra-progresso-preenchida {
+    height: 100%;
+    background: linear-gradient(to right, var(--primary), var(--success));
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* Botões da Lista */
+.btn-limpar-lista, .btn-resetar-checks {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+.btn-limpar-lista:hover {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+
+.btn-resetar-checks:hover {
+    background: var(--secondary);
+    color: white;
+    border-color: var(--secondary);
+}
+
 /* Mobile */
 @media (max-width: 600px) {
     .despesa-form {
@@ -407,9 +570,27 @@ button {
     .resumo {
         grid-template-columns: 1fr;
     }
+    .resumo-compras {
+        grid-template-columns: 1fr;
+    }
     .mes-atual {
         flex-direction: column;
         gap: 15px;
         text-align: center;
+    }
+    .tab-btn {
+        min-width: 100px;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+    .lista-compras-header {
+        grid-template-columns: 1fr 60px 80px 50px;
+        font-size: 0.75rem;
+        padding: 12px;
+    }
+    .item-compra {
+        grid-template-columns: 24px 1fr 60px 40px;
+        padding: 10px 12px;
+        font-size: 0.9rem;
     }
 }
