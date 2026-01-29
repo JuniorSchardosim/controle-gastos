@@ -702,6 +702,7 @@ function renderizarItensCompras() {
         bebidas: '🥤 Bebidas',
         higiene: '🧼 Higiene e Limpeza',
         congelados: '❄️ Congelados',
+        preco: '💰 Se estiver um bom preço compra',
         outros: '📦 Outros'
     };
 
