@@ -35,6 +35,7 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="mudarAba('despesas')">💰 Despesas Mensais</button>
         <button class="tab-btn" onclick="mudarAba('vale')">🛒 Vale Alimentação</button>
+        <button class="tab-btn" onclick="mudarAba('supermercado')">🛍️ Lista de Compras</button>
         <button class="tab-btn" onclick="mudarAba('futuras')">📅 Compras Futuras</button>
     </div>
 
@@ -159,6 +160,67 @@
             </div>
         </div>
 
+        <!-- ABA LISTA DE COMPRAS SUPERMERCADO -->
+        <div id="aba-supermercado" class="aba-conteudo">
+            <h1>🛍️ Lista de Compras do Supermercado</h1>
+
+            <div class="mes-atual">
+                <h2>Organize suas compras</h2>
+            </div>
+
+            <div class="despesas-section">
+                <h2>Adicionar Item à Lista</h2>
+                <div class="despesa-form">
+                    <input type="text" id="nome-item-compra" placeholder="Nome do produto">
+                    <input type="number" id="quantidade-item" placeholder="Quantidade" min="1" step="0.1">
+                    <select id="categoria-item">
+                        <option value="alimentos">Alimentos</option>
+                        <option value="bebidas">Bebidas</option>
+                        <option value="higiene">Higiene e Limpeza</option>
+                        <option value="congelados">Congelados</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                    <button class="btn-adicionar" onclick="adicionarItemCompra()">Adicionar</button>
+                </div>
+
+                <div class="lista-compras-container">
+                    <div class="lista-compras-header">
+                        <span class="header-item">Produto</span>
+                        <span class="header-qtd">Qtd</span>
+                        <span class="header-status">Status</span>
+                        <span class="header-acao">Ação</span>
+                    </div>
+                    <div class="lista-compras" id="lista-compras-supermercado">
+                        <p class="vazio">Nenhum item adicionado</p>
+                    </div>
+                </div>
+
+                <div class="resumo-compras">
+                    <div class="resumo-item">
+                        <span class="resumo-label">Total de Itens:</span>
+                        <span class="resumo-valor" id="total-itens">0</span>
+                    </div>
+                    <div class="resumo-item">
+                        <span class="resumo-label">Itens Coletados:</span>
+                        <span class="resumo-valor" id="itens-coletados">0</span>
+                    </div>
+                    <div class="resumo-item">
+                        <span class="resumo-label">Progresso:</span>
+                        <span class="resumo-valor" id="progresso-compras">0%</span>
+                    </div>
+                </div>
+
+                <div class="barra-progresso">
+                    <div class="barra-progresso-preenchida" id="barra-progresso"></div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+                    <button class="btn-limpar-lista" onclick="limparListaCompras()">🗑️ Limpar Lista</button>
+                    <button class="btn-resetar-checks" onclick="resetarChecksCompras()">↻ Resetar Marcações</button>
+                </div>
+            </div>
+        </div>
+
         <!-- ABA COMPRAS FUTURAS -->
         <div id="aba-futuras" class="aba-conteudo">
             <h1>📅 Compras Futuras Planejadas</h1>
@@ -198,5 +260,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
