@@ -698,17 +698,18 @@ function renderizarItensCompras() {
     });
 
     const categoriaLabels = {
-        alimentos: '🥕 Alimentos',
-        bebidas: '🥤 Bebidas',
-        higiene: '🧼 Higiene e Limpeza',
-        congelados: '❄️ Congelados',
-        preco: '💰 Se estiver um bom preço compra',
-        outros: '📦 Outros'
+        'alimentos': '🥕 Alimentos',
+        'bebidas': '🥤 Bebidas',
+        'higiene': '🧼 Higiene e Limpeza',
+        'congelados': '❄️ Congelados',
+        'preco': '💰 Se estiver um bom preço compra',
+        'outros': '📦 Outros'
     };
 
     let html = '';
     Object.entries(porCategoria).forEach(([categoria, items]) => {
-        html += `<div class="categoria-compras"><strong>${categoriaLabels[categoria]}</strong></div>`;
+        const labelCategoria = categoriaLabels[categoria] || `📦 ${categoria}`;
+        html += `<div class="categoria-compras"><strong>${labelCategoria}</strong></div>`;
         items.forEach(item => {
             html += `
                 <div class="item-compra ${item.coletado ? 'coletado' : ''}">
