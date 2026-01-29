@@ -165,7 +165,7 @@
             <h1>🛍️ Lista de Compras do Supermercado</h1>
 
             <div class="mes-atual">
-                <h2>Organizar compras</h2>
+                <h2>Organize suas compras</h2>
             </div>
 
             <div class="despesas-section">
@@ -218,6 +218,23 @@
                     <button class="btn-limpar-lista" onclick="limparListaCompras()">🗑️ Limpar Lista</button>
                     <button class="btn-resetar-checks" onclick="resetarChecksCompras()">↻ Resetar Marcações</button>
                 </div>
+
+                <div style="margin-top: 40px; border-top: 2px solid var(--border); padding-top: 30px;">
+                    <h2>📋 Itens Pendentes (Comprar em Outro Lugar)</h2>
+                    <div class="lista-compras-container">
+                        <div class="lista-compras-header">
+                            <span class="header-item">Produto</span>
+                            <span class="header-qtd">Qtd</span>
+                            <span class="header-acao">Ação</span>
+                        </div>
+                        <div class="lista-compras" id="lista-pendentes-supermercado">
+                            <p class="vazio">Nenhum item pendente</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
+                        <button class="btn-limpar-lista" onclick="limparListaPendentes()">🗑️ Limpar Pendentes</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -260,4 +277,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
