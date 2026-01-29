@@ -409,7 +409,7 @@ button {
 
 .lista-compras-header {
     display: grid;
-    grid-template-columns: 1fr 80px 100px 60px;
+    grid-template-columns: 1fr 80px 60px;
     gap: 12px;
     padding: 16px;
     background: var(--input-bg);
@@ -421,7 +421,6 @@ button {
 
 .header-item { text-align: left; }
 .header-qtd { text-align: center; }
-.header-status { text-align: center; }
 .header-acao { text-align: center; }
 
 .lista-compras {
@@ -442,7 +441,7 @@ button {
 
 .item-compra {
     display: grid;
-    grid-template-columns: 30px 1fr 80px 60px;
+    grid-template-columns: 1fr 80px 60px;
     gap: 12px;
     align-items: center;
     padding: 14px 16px;
@@ -464,11 +463,19 @@ button {
     color: var(--text-muted);
 }
 
+.label-item-compra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
 .checkbox-compra {
     width: 20px;
     height: 20px;
     cursor: pointer;
     accent-color: var(--success);
+    flex-shrink: 0;
 }
 
 .nome-item {
@@ -584,12 +591,12 @@ button {
         font-size: 0.85rem;
     }
     .lista-compras-header {
-        grid-template-columns: 1fr 60px 80px 50px;
+        grid-template-columns: 1fr 60px 50px;
         font-size: 0.75rem;
         padding: 12px;
     }
     .item-compra {
-        grid-template-columns: 24px 1fr 60px 40px;
+        grid-template-columns: 1fr 60px 40px;
         padding: 10px 12px;
         font-size: 0.9rem;
     }
