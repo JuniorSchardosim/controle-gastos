@@ -713,8 +713,10 @@ function renderizarItensCompras() {
         items.forEach(item => {
             html += `
                 <div class="item-compra ${item.coletado ? 'coletado' : ''}">
-                    <input type="checkbox" ${item.coletado ? 'checked' : ''} onchange="marcarItemColetado(${item.id})" class="checkbox-compra">
-                    <span class="nome-item">${item.nome}</span>
+                    <label class="label-item-compra">
+                        <input type="checkbox" ${item.coletado ? 'checked' : ''} onchange="marcarItemColetado(${item.id})" class="checkbox-compra">
+                        <span class="nome-item">${item.nome}</span>
+                    </label>
                     <span class="qtd-item">${item.quantidade}</span>
                     <button class="btn-remover-item" onclick="removerItemCompra(${item.id})">🗑️</button>
                 </div>
