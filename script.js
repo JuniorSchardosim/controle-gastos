@@ -9,6 +9,13 @@ let itensPendentes = [];
 let mesAtualData = new Date(); // Data para Despesas Mensais
 let valeMesAtualData = new Date(); // Data para Vale Alimentação
 
+// Função auxiliar para formatar valores monetários corretamente
+function formatarMoeda(valor) {
+    const arredondado = Math.round(valor * 100) / 100;
+    // Se for zero negativo, converte para positivo
+    return Object.is(arredondado, -0) ? 0 : arredondado;
+}
+
 // Esperar Firebase carregar
 setTimeout(inicializar, 1000);
 
@@ -345,15 +352,15 @@ function renderizarDespesas() {
 function atualizarResumo() {
     const salario = parseFloat(document.getElementById('salario').value) || 0;
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
-    let saldo = salario - totalDespesas;
-    
-    // Arredondar para 2 casas decimais e corrigir -0.00
-    saldo = Math.round(saldo * 100) / 100;
-    if (saldo === 0) saldo = 0; // Evita -0.00
+    const saldo = salario - totalDespesas;
+    const saldoFormatado = formatarMoeda(saldo);
+    const corSaldo = saldoFormatado >= 0 ? '#64ffda' : '#ff6b6b'; // Verde para positivo, vermelho para negativo
 
     document.getElementById('resumo-salario').textContent = `R$ ${salario.toFixed(2)}`;
     document.getElementById('resumo-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
-    document.getElementById('resumo-saldo').textContent = `R$ ${saldo.toFixed(2)}`;
+    const saldoElement = document.getElementById('resumo-saldo');
+    saldoElement.textContent = `R$ ${saldoFormatado.toFixed(2)}`;
+    saldoElement.style.color = corSaldo;
 }
 
 function fecharMes() {
@@ -365,11 +372,7 @@ function fecharMes() {
     const anoAtual = mesAtualData.getFullYear();
     const salario = parseFloat(document.getElementById('salario').value) || 0;
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
-    let saldo = salario - totalDespesas;
-    
-    // Arredondar para 2 casas decimais e corrigir -0.00
-    saldo = Math.round(saldo * 100) / 100;
-    if (saldo === 0) saldo = 0; // Evita -0.00
+    const saldo = formatarMoeda(salario - totalDespesas);
 
     historico.push({
         mes: `${mesAtual} de ${anoAtual}`,
@@ -441,7 +444,7 @@ function renderizarHistorico() {
                 </div>
                 <div class="historico-resumo-item">
                     <div class="historico-resumo-label">Saldo</div>
-                    <div class="historico-resumo-valor" style="color: ${mes.saldo >= 0 ? '#64ffda' : '#ff6b6b'};">R$ ${mes.saldo.toFixed(2)}</div>
+                    <div class="historico-resumo-valor" style="color: ${formatarMoeda(mes.saldo) >= 0 ? '#64ffda' : '#ff6b6b'};">R$ ${formatarMoeda(mes.saldo).toFixed(2)}</div>
                 </div>
             </div>
             <div class="historico-despesas">
@@ -552,15 +555,15 @@ function renderizarCompras() {
 function atualizarValeResumo() {
     const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
     const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
-    let saldo = totalRecarga - totalGasto;
-    
-    // Arredondar para 2 casas decimais e corrigir -0.00
-    saldo = Math.round(saldo * 100) / 100;
-    if (saldo === 0) saldo = 0; // Evita -0.00
+    const saldo = totalRecarga - totalGasto;
+    const saldoFormatado = formatarMoeda(saldo);
+    const corSaldo = saldoFormatado >= 0 ? '#64ffda' : '#ff6b6b'; // Verde para positivo, vermelho para negativo
 
     document.getElementById('vale-total-recarga').textContent = `R$ ${totalRecarga.toFixed(2)}`;
     document.getElementById('vale-total-gasto').textContent = `R$ ${totalGasto.toFixed(2)}`;
-    document.getElementById('vale-saldo').textContent = `R$ ${saldo.toFixed(2)}`;
+    const valeSaldoElement = document.getElementById('vale-saldo');
+    valeSaldoElement.textContent = `R$ ${saldoFormatado.toFixed(2)}`;
+    valeSaldoElement.style.color = corSaldo;
 }
 
 function fecharMesVale() {
@@ -572,11 +575,7 @@ function fecharMesVale() {
     const anoAtual = valeMesAtualData.getFullYear();
     const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
     const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
-    let saldo = totalRecarga - totalGasto;
-    
-    // Arredondar para 2 casas decimais e corrigir -0.00
-    saldo = Math.round(saldo * 100) / 100;
-    if (saldo === 0) saldo = 0; // Evita -0.00
+    const saldo = formatarMoeda(totalRecarga - totalGasto);
 
     valeHistorico.push({
         mes: `${mesAtual} de ${anoAtual}`,
@@ -626,7 +625,7 @@ function renderizarValeHistorico() {
                 </div>
                 <div class="historico-resumo-item">
                     <div class="historico-resumo-label">Saldo</div>
-                    <div class="historico-resumo-valor" style="color: ${mes.saldo >= 0 ? '#64ffda' : '#ff6b6b'};">R$ ${mes.saldo.toFixed(2)}</div>
+                    <div class="historico-resumo-valor" style="color: ${formatarMoeda(mes.saldo) >= 0 ? '#64ffda' : '#ff6b6b'};">R$ ${formatarMoeda(mes.saldo).toFixed(2)}</div>
                 </div>
             </div>
             <div class="historico-despesas">
