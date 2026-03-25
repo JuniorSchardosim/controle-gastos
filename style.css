@@ -280,9 +280,10 @@ button {
     font-weight: 800;
 }
 
-#resumo-saldo, #vale-saldo {
+/* Cores do saldo são controladas dinamicamente pelo JavaScript */
+/* #resumo-saldo, #vale-saldo {
     color: var(--success);
-}
+} */
 
 /* Historico */
 .historico-item {
