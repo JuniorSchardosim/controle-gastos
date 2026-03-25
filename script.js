@@ -11,8 +11,15 @@ let valeMesAtualData = new Date(); // Data para Vale Alimentação
 
 // Função auxiliar para formatar valores monetários corretamente
 function formatarMoeda(valor) {
-    const arredondado = Math.round(valor * 100) / 100;
-    // Se for zero negativo, converte para positivo
+    // Arredondar para 2 casas decimais
+    let arredondado = Math.round(valor * 100) / 100;
+    
+    // Forçar valor absoluto se estiver muito próximo de zero
+    if (arredondado === 0 || arredondado === -0 || Math.abs(arredondado) < 0.01) {
+        arredondado = 0;
+    }
+    
+    // Garantir que -0 nunca seja retornado
     return Object.is(arredondado, -0) ? 0 : arredondado;
 }
 
