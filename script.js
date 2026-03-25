@@ -345,7 +345,11 @@ function renderizarDespesas() {
 function atualizarResumo() {
     const salario = parseFloat(document.getElementById('salario').value) || 0;
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
-    const saldo = salario - totalDespesas;
+    let saldo = salario - totalDespesas;
+    
+    // Arredondar para 2 casas decimais e corrigir -0.00
+    saldo = Math.round(saldo * 100) / 100;
+    if (saldo === 0) saldo = 0; // Evita -0.00
 
     document.getElementById('resumo-salario').textContent = `R$ ${salario.toFixed(2)}`;
     document.getElementById('resumo-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
@@ -361,7 +365,11 @@ function fecharMes() {
     const anoAtual = mesAtualData.getFullYear();
     const salario = parseFloat(document.getElementById('salario').value) || 0;
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
-    const saldo = salario - totalDespesas;
+    let saldo = salario - totalDespesas;
+    
+    // Arredondar para 2 casas decimais e corrigir -0.00
+    saldo = Math.round(saldo * 100) / 100;
+    if (saldo === 0) saldo = 0; // Evita -0.00
 
     historico.push({
         mes: `${mesAtual} de ${anoAtual}`,
@@ -544,7 +552,11 @@ function renderizarCompras() {
 function atualizarValeResumo() {
     const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
     const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
-    const saldo = totalRecarga - totalGasto;
+    let saldo = totalRecarga - totalGasto;
+    
+    // Arredondar para 2 casas decimais e corrigir -0.00
+    saldo = Math.round(saldo * 100) / 100;
+    if (saldo === 0) saldo = 0; // Evita -0.00
 
     document.getElementById('vale-total-recarga').textContent = `R$ ${totalRecarga.toFixed(2)}`;
     document.getElementById('vale-total-gasto').textContent = `R$ ${totalGasto.toFixed(2)}`;
@@ -560,7 +572,11 @@ function fecharMesVale() {
     const anoAtual = valeMesAtualData.getFullYear();
     const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
     const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
-    const saldo = totalRecarga - totalGasto;
+    let saldo = totalRecarga - totalGasto;
+    
+    // Arredondar para 2 casas decimais e corrigir -0.00
+    saldo = Math.round(saldo * 100) / 100;
+    if (saldo === 0) saldo = 0; // Evita -0.00
 
     valeHistorico.push({
         mes: `${mesAtual} de ${anoAtual}`,
