@@ -4,10 +4,7 @@ let valeRecargas = [];
 let valeCompras = [];
 let valeHistorico = [];
 let comprasFuturas = [];
-let itensCompras = [];
-let itensPendentes = [];
-let mesAtualData = new Date(); // Data para Despesas Mensais
-let valeMesAtualData = new Date(); // Data para Vale Alimentação
+let mesAtualData = new Date();
 
 // Esperar Firebase carregar
 setTimeout(inicializar, 1000);
@@ -33,9 +30,6 @@ async function carregarDados() {
             
             if (dados.mesAtualData) {
                 mesAtualData = new Date(dados.mesAtualData);
-            }
-            if (dados.valeMesAtualData) {
-                valeMesAtualData = new Date(dados.valeMesAtualData);
             }
             
             if (dados.salario) {
@@ -64,14 +58,6 @@ async function carregarDados() {
                 comprasFuturas = dados.comprasFuturas;
                 renderizarComprasFuturas();
             }
-            if (dados.itensCompras) {
-                itensCompras = dados.itensCompras;
-                renderizarItensCompras();
-            }
-            if (dados.itensPendentes) {
-                itensPendentes = dados.itensPendentes;
-                renderizarItensPendentes();
-            }
         }
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -83,7 +69,6 @@ async function carregarDados() {
     atualizarFuturasResumo();
     atualizarMesAtual();
     atualizarValeMesAtual();
-    atualizarResumoCompras();
 }
 
 function setupListeners() {
@@ -119,30 +104,12 @@ function setupListeners() {
                 valeHistorico = dados.valeHistorico || [];
                 renderizarValeHistorico();
             }
-
-            if (JSON.stringify(dados.itensCompras) !== JSON.stringify(itensCompras)) {
-                itensCompras = dados.itensCompras || [];
-                renderizarItensCompras();
-                atualizarResumoCompras();
-            }
-
-            if (JSON.stringify(dados.itensPendentes) !== JSON.stringify(itensPendentes)) {
-                itensPendentes = dados.itensPendentes || [];
-                renderizarItensPendentes();
-            }
             
             if (dados.mesAtualData) {
                 const novaData = new Date(dados.mesAtualData);
                 if (novaData.getTime() !== mesAtualData.getTime()) {
                     mesAtualData = novaData;
                     atualizarMesAtual();
-                }
-            }
-
-            if (dados.valeMesAtualData) {
-                const novaDataVale = new Date(dados.valeMesAtualData);
-                if (novaDataVale.getTime() !== valeMesAtualData.getTime()) {
-                    valeMesAtualData = novaDataVale;
                     atualizarValeMesAtual();
                 }
             }
@@ -161,14 +128,13 @@ async function salvarDados() {
             valeCompras: valeCompras,
             valeHistorico: valeHistorico,
             comprasFuturas: comprasFuturas,
-            itensCompras: itensCompras,
-            itensPendentes: itensPendentes,
             mesAtualData: mesAtualData.toISOString(),
-            valeMesAtualData: valeMesAtualData.toISOString(),
             ultimaAtualizacao: new Date().toISOString()
         });
+        console.log('Dados salvos com sucesso! Mês atual:', mesAtualData);
     } catch (error) {
         console.error('Erro ao salvar dados:', error);
+        alert('Erro ao salvar dados. Tente novamente.');
     }
 }
 
@@ -178,13 +144,14 @@ function atualizarMesAtual() {
     const mesAtual = meses[mesAtualData.getMonth()];
     const anoAtual = mesAtualData.getFullYear();
     document.getElementById('mes-atual-nome').textContent = `${mesAtual} de ${anoAtual}`;
+    console.log('Mês atualizado para:', mesAtual, anoAtual);
 }
 
 function atualizarValeMesAtual() {
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const mesAtual = meses[valeMesAtualData.getMonth()];
-    const anoAtual = valeMesAtualData.getFullYear();
+    const mesAtual = meses[mesAtualData.getMonth()];
+    const anoAtual = mesAtualData.getFullYear();
     document.getElementById('vale-mes-atual').textContent = `${mesAtual} de ${anoAtual}`;
 }
 
@@ -201,43 +168,40 @@ function mudarAba(aba) {
     } else if (aba === 'vale') {
         document.getElementById('aba-vale').classList.add('active');
         botoes[1].classList.add('active');
-    } else if (aba === 'supermercado') {
-        document.getElementById('aba-supermercado').classList.add('active');
-        botoes[2].classList.add('active');
     } else if (aba === 'futuras') {
         document.getElementById('aba-futuras').classList.add('active');
-        botoes[3].classList.add('active');
+        botoes[2].classList.add('active');
     }
 }
 
-// NAVEGAÇÃO DESPESAS
+// FUNÇÕES DE NAVEGAÇÃO DE MÊS
 function voltarMes() {
+    console.log('Voltando mês...');
     mesAtualData = new Date(mesAtualData);
     mesAtualData.setMonth(mesAtualData.getMonth() - 1);
     atualizarMesAtual();
+    atualizarValeMesAtual();
     salvarDados();
+    console.log('Voltou para:', mesAtualData);
 }
 
 function avancarMes() {
+    console.log('Avançando mês...');
     mesAtualData = new Date(mesAtualData);
     mesAtualData.setMonth(mesAtualData.getMonth() + 1);
     atualizarMesAtual();
-    salvarDados();
-}
-
-// NAVEGAÇÃO VALE
-function voltarMesVale() {
-    valeMesAtualData = new Date(valeMesAtualData);
-    valeMesAtualData.setMonth(valeMesAtualData.getMonth() - 1);
     atualizarValeMesAtual();
     salvarDados();
+    console.log('Avançou para:', mesAtualData);
 }
 
-function avancarMesVale() {
-    valeMesAtualData = new Date(valeMesAtualData);
-    valeMesAtualData.setMonth(valeMesAtualData.getMonth() + 1);
+function irParaMesAtual() {
+    console.log('Indo para mês atual...');
+    mesAtualData = new Date();
+    atualizarMesAtual();
     atualizarValeMesAtual();
     salvarDados();
+    alert('Voltou para o mês atual!');
 }
 
 document.getElementById('salario').addEventListener('input', function() {
@@ -245,27 +209,99 @@ document.getElementById('salario').addEventListener('input', function() {
     salvarDados();
 });
 
+// Preview do comprovante
+document.getElementById('comprovante-despesa').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('preview-comprovante');
+    
+    if (file) {
+        preview.style.display = 'block';
+        
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${e.target.result}" alt="Preview">
+                        <span class="file-name">📎 ${file.name}</span>
+                        <button onclick="removerComprovante()" style="margin-left: auto; padding: 5px 10px; background: #ff6b6b; border: none; border-radius: 5px; color: white; cursor: pointer;">Remover</button>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="file-name">📄 ${file.name}</span>
+                    <button onclick="removerComprovante()" style="margin-left: auto; padding: 5px 10px; background: #ff6b6b; border: none; border-radius: 5px; color: white; cursor: pointer;">Remover</button>
+                </div>
+            `;
+        }
+    }
+});
+
+function removerComprovante() {
+    document.getElementById('comprovante-despesa').value = '';
+    document.getElementById('preview-comprovante').style.display = 'none';
+    document.getElementById('preview-comprovante').innerHTML = '';
+}
+
 function adicionarDespesa() {
     const nome = document.getElementById('nome-despesa').value.trim();
     const valor = parseFloat(document.getElementById('valor-despesa').value);
     const meses = parseInt(document.getElementById('meses-despesa').value) || 1;
     const fixa = document.getElementById('despesa-fixa').checked;
-
+    const comprovanteInput = document.getElementById('comprovante-despesa');
+    
     if (!nome || isNaN(valor) || valor <= 0) {
         alert('Por favor, preencha o nome e o valor da despesa corretamente.');
         return;
     }
 
-    despesas.push({ nome, valor, meses, fixa });
-    
+    const despesa = { 
+        nome, 
+        valor, 
+        meses: fixa ? 999 : meses, // 999 = infinito para fixas
+        mesesOriginais: meses, // guardar o valor original
+        fixa,
+        comprovante: null
+    };
+
+    // Processar comprovante se houver
+    if (comprovanteInput.files.length > 0) {
+        const file = comprovanteInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            despesa.comprovante = {
+                nome: file.name,
+                tipo: file.type,
+                dados: e.target.result
+            };
+            
+            despesas.push(despesa);
+            limparFormularioDespesa();
+            renderizarDespesas();
+            atualizarResumo();
+            salvarDados();
+        };
+        
+        reader.readAsDataURL(file);
+    } else {
+        despesas.push(despesa);
+        limparFormularioDespesa();
+        renderizarDespesas();
+        atualizarResumo();
+        salvarDados();
+    }
+}
+
+function limparFormularioDespesa() {
     document.getElementById('nome-despesa').value = '';
     document.getElementById('valor-despesa').value = '';
     document.getElementById('meses-despesa').value = '';
     document.getElementById('despesa-fixa').checked = false;
-
-    renderizarDespesas();
-    atualizarResumo();
-    salvarDados();
+    removerComprovante();
 }
 
 function removerDespesa(index) {
@@ -283,27 +319,94 @@ function renderizarDespesas() {
         return;
     }
 
-    lista.innerHTML = despesas.map((despesa, index) => {
-        let infoExtra = '';
-        if (despesa.fixa) infoExtra = 'Despesa fixa - repete todos os meses';
-        else if (despesa.meses > 1) infoExtra = `Faltam ${despesa.meses} parcela(s)`;
-        else if (despesa.meses === 1) infoExtra = 'Pagamento único';
-        else infoExtra = 'Pagamento único';
+    lista.innerHTML = '';
+    
+    despesas.forEach((despesa, index) => {
+        const item = document.createElement('div');
+        item.className = 'despesa-item';
         
-        return `
-            <div class="despesa-item">
-                <div class="despesa-info">
-                    <div class="despesa-nome">
-                        ${despesa.nome}
-                        ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
-                    </div>
-                    <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
-                    <div class="despesa-info-extra">${infoExtra}</div>
+        let infoExtra = '';
+        
+        if (despesa.fixa) {
+            infoExtra = 'Despesa fixa - repete todos os meses';
+        } else if (despesa.meses > 1) {
+            infoExtra = `🔢 Parcela restante: ${despesa.meses}x de R$ ${despesa.valor.toFixed(2)}`;
+        } else if (despesa.meses === 1) {
+            infoExtra = '✅ Última parcela';
+        } else {
+            infoExtra = 'Pagamento único';
+        }
+        
+        const comprovanteHTML = despesa.comprovante 
+            ? `<span class="comprovante-icon" onclick="verComprovante(${index})" title="Ver comprovante">📎</span>` 
+            : '';
+        
+        item.innerHTML = `
+            <div class="despesa-info">
+                <div class="despesa-nome">
+                    ${despesa.nome}
+                    ${despesa.fixa ? '<span class="badge-fixa">FIXA</span>' : ''}
+                    ${comprovanteHTML}
                 </div>
-                <button class="btn-remover" onclick="removerDespesa(${index})">Remover</button>
+                <div class="despesa-valor">R$ ${despesa.valor.toFixed(2)}</div>
+                <div class="despesa-info-extra">${infoExtra}</div>
+            </div>
+            <button class="btn-remover btn-remover-despesa" data-index="${index}">Remover</button>
+        `;
+        
+        lista.appendChild(item);
+    });
+    
+    // Adicionar event listeners
+    document.querySelectorAll('.btn-remover-despesa').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            removerDespesa(index);
+        });
+    });
+}
+
+function verComprovante(index) {
+    const despesa = despesas[index];
+    if (!despesa.comprovante) return;
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    `;
+    
+    if (despesa.comprovante.tipo.startsWith('image/')) {
+        modal.innerHTML = `
+            <div style="position: relative; max-width: 90%; max-height: 90%;">
+                <img src="${despesa.comprovante.dados}" style="max-width: 100%; max-height: 90vh; border-radius: 10px;">
+                <button onclick="this.parentElement.parentElement.remove()" style="position: absolute; top: 10px; right: 10px; padding: 10px 20px; background: #ff6b6b; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold;">✕ Fechar</button>
             </div>
         `;
-    }).join('');
+    } else {
+        modal.innerHTML = `
+            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                <h3 style="color: #000; margin-bottom: 20px;">📄 ${despesa.comprovante.nome}</h3>
+                <a href="${despesa.comprovante.dados}" download="${despesa.comprovante.nome}" style="display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin-right: 10px;">⬇️ Baixar</a>
+                <button onclick="this.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ff6b6b; border: none; border-radius: 5px; color: white; cursor: pointer;">✕ Fechar</button>
+            </div>
+        `;
+    }
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.remove();
+    });
+    
+    document.body.appendChild(modal);
 }
 
 function atualizarResumo() {
@@ -317,39 +420,97 @@ function atualizarResumo() {
 }
 
 function fecharMes() {
-    if (!confirm('Tem certeza que deseja fechar este mês?')) return;
-
-    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const mesAtual = meses[mesAtualData.getMonth()];
-    const anoAtual = mesAtualData.getFullYear();
+    console.log('=== INICIANDO FECHAMENTO DO MÊS ===');
+    console.log('Mês ANTES de fechar:', mesAtualData);
+    
     const salario = parseFloat(document.getElementById('salario').value) || 0;
+    
+    if (salario === 0 && despesas.length === 0) {
+        alert('Adicione pelo menos o salário ou alguma despesa antes de fechar o mês.');
+        return;
+    }
+
+    const confirmar = confirm('Deseja fechar o mês atual e salvar no histórico? Os dados atuais serão zerados.');
+    if (!confirmar) {
+        console.log('Usuário cancelou');
+        return;
+    }
+
     const totalDespesas = despesas.reduce((total, despesa) => total + despesa.valor, 0);
     const saldo = salario - totalDespesas;
 
-    historico.push({
-        mes: `${mesAtual} de ${anoAtual}`,
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    
+    console.log('Mês sendo salvo no histórico:', meses[mesAtualData.getMonth()], mesAtualData.getFullYear());
+    
+    const mesHistorico = {
+        mes: `${meses[mesAtualData.getMonth()]} de ${mesAtualData.getFullYear()}`,
+        data: mesAtualData.toISOString(),
         salario: salario,
-        despesas: despesas.map(d => ({ ...d })),
+        despesas: [...despesas],
         totalDespesas: totalDespesas,
         saldo: saldo
+    };
+
+    historico.unshift(mesHistorico);
+
+    // Processar despesas para o próximo mês
+    const despesasProximoMes = [];
+    
+    despesas.forEach(despesa => {
+        if (despesa.fixa || despesa.meses === 999) {
+            // Despesa fixa: mantém para sempre
+            despesasProximoMes.push({ ...despesa, meses: 999 });
+        } else if (despesa.meses > 1) {
+            // Despesa parcelada: diminui o contador
+            despesasProximoMes.push({
+                ...despesa,
+                meses: despesa.meses - 1
+            });
+        }
+        // Se não é fixa nem tem mais parcelas, não adiciona ao próximo mês
     });
 
-    despesas = [];
-    document.getElementById('salario').value = '';
-    mesAtualData = new Date(mesAtualData);
-    mesAtualData.setMonth(mesAtualData.getMonth() + 1);
+    console.log('Despesas que vão para o próximo mês:', despesasProximoMes);
 
+    despesas = despesasProximoMes;
+    document.getElementById('salario').value = '';
+    
+    // AVANÇAR O MÊS
+    console.log('Avançando mês...');
+    const mesAntes = mesAtualData.getMonth();
+    const anoAntes = mesAtualData.getFullYear();
+    
+    mesAtualData.setMonth(mesAtualData.getMonth() + 1);
+    
+    const mesDepois = mesAtualData.getMonth();
+    const anoDepois = mesAtualData.getFullYear();
+    
+    console.log('Mês ANTES:', meses[mesAntes], anoAntes);
+    console.log('Mês DEPOIS:', meses[mesDepois], anoDepois);
+    console.log('mesAtualData após setMonth:', mesAtualData);
+    
     atualizarMesAtual();
+    atualizarValeMesAtual();
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
+    
+    console.log('Salvando dados no Firebase...');
     salvarDados();
-    alert('Mês fechado com sucesso!');
+
+    const mensagemFixas = despesasProximoMes.length > 0 
+        ? `\n\n${despesasProximoMes.length} despesa(s) foram automaticamente transferidas para o próximo mês.`
+        : '';
+
+    alert('Mês fechado e salvo no histórico com sucesso!' + mensagemFixas);
+    console.log('=== FECHAMENTO CONCLUÍDO ===');
 }
 
 function renderizarHistorico() {
     const lista = document.getElementById('historico-lista');
+    
     if (historico.length === 0) {
         lista.innerHTML = '<p class="vazio">Nenhum mês fechado ainda</p>';
         return;
@@ -360,8 +521,12 @@ function renderizarHistorico() {
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirMes(${index})">🔄 Reabrir</button>
-                    <button class="btn-remover" onclick="excluirMes(${index})">🗑️ Excluir</button>
+                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirHistorico(${index})">
+                        🔄 Reabrir
+                    </button>
+                    <button class="btn-excluir-historico" onclick="excluirHistorico(${index})">
+                        🗑️ Excluir
+                    </button>
                 </div>
             </div>
             <div class="historico-resumo">
@@ -379,57 +544,75 @@ function renderizarHistorico() {
                 </div>
             </div>
             <div class="historico-despesas">
-                <h4>Despesas:</h4>
-                ${mes.despesas.map(d => `<div class="historico-despesa-item"><span>${d.nome}</span><span style="color: #ff6b6b;">R$ ${d.valor.toFixed(2)}</span></div>`).join('')}
+                <h4>Despesas do mês:</h4>
+                ${mes.despesas.map(despesa => `
+                    <div class="historico-despesa-item">
+                        <span>${despesa.nome}</span>
+                        <span style="color: #ff6b6b;">R$ ${despesa.valor.toFixed(2)}</span>
+                    </div>
+                `).join('')}
             </div>
         </div>
     `).join('');
 }
 
-function reabrirMes(index) {
+function reabrirHistorico(index) {
     const mes = historico[index];
-    if (!confirm(`Reabrir ${mes.mes}?`)) return;
 
+    const confirmar = confirm(
+        `Reabrir ${mes.mes}? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
+    );
+    if (!confirmar) return;
+
+    document.getElementById('salario').value = mes.salario.toFixed(2);
     despesas = mes.despesas.map(d => ({ ...d }));
-    document.getElementById('salario').value = mes.salario;
 
+    // Extrair o mês e ano do histórico
     const partes = mes.mes.split(' de ');
     if (partes.length === 2) {
+        const nomeMes = partes[0];
+        const ano = parseInt(partes[1], 10);
         const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-        const idxMes = mesesNomes.indexOf(partes[0]);
-        if (idxMes !== -1) mesAtualData = new Date(parseInt(partes[1]), idxMes, 1);
+        const idxMes = mesesNomes.indexOf(nomeMes);
+        if (idxMes !== -1 && !isNaN(ano)) {
+            mesAtualData = new Date(ano, idxMes, 1);
+        }
     }
 
+    // Remover do histórico
     historico.splice(index, 1);
+
     renderizarDespesas();
     atualizarResumo();
     renderizarHistorico();
     atualizarMesAtual();
+    atualizarValeMesAtual();
     salvarDados();
+
+    alert(`Mês ${mes.mes} reaberto para edição.`);
 }
 
-function excluirMes(index) {
-    if (confirm('Excluir este mês do histórico?')) {
-        historico.splice(index, 1);
-        renderizarHistorico();
-        salvarDados();
-    }
-}
-
-// VALE ALIMENTAÇÃO
+// FUNÇÕES VALE ALIMENTAÇÃO
 function adicionarRecarga() {
     const valor = parseFloat(document.getElementById('vale-recarga').value);
-    
+
     if (isNaN(valor) || valor <= 0) {
-        alert('Por favor, insira um valor válido.');
+        alert('Por favor, insira um valor válido para a recarga.');
         return;
     }
 
-    valeRecargas.push({ valor, data: new Date().toISOString() });
+    const data = new Date();
+    valeRecargas.push({ 
+        valor, 
+        data: data.toISOString(),
+        dataFormatada: data.toLocaleDateString('pt-BR')
+    });
+    
     document.getElementById('vale-recarga').value = '';
     atualizarValeResumo();
     salvarDados();
+    alert('Recarga adicionada com sucesso!');
 }
 
 function adicionarCompra() {
@@ -437,12 +620,19 @@ function adicionarCompra() {
     const valor = parseFloat(document.getElementById('valor-compra').value);
     const dataInput = document.getElementById('data-compra').value;
 
-    if (!nome || isNaN(valor) || valor <= 0 || !dataInput) {
-        alert('Por favor, preencha todos os campos corretamente.');
+    if (!nome || isNaN(valor) || valor <= 0) {
+        alert('Por favor, preencha o nome e o valor da compra corretamente.');
         return;
     }
 
-    valeCompras.push({ nome, valor, data: dataInput });
+    const data = dataInput ? new Date(dataInput + 'T12:00:00') : new Date();
+    
+    valeCompras.push({ 
+        nome, 
+        valor,
+        data: data.toISOString(),
+        dataFormatada: data.toLocaleDateString('pt-BR')
+    });
     
     document.getElementById('nome-compra').value = '';
     document.getElementById('valor-compra').value = '';
@@ -468,24 +658,21 @@ function renderizarCompras() {
         return;
     }
 
-    lista.innerHTML = valeCompras.map((compra, index) => {
-        const data = new Date(compra.data).toLocaleDateString('pt-BR');
-        return `
-            <div class="despesa-item">
-                <div class="despesa-info">
-                    <div class="despesa-nome">${compra.nome}</div>
-                    <div class="despesa-valor">R$ ${compra.valor.toFixed(2)}</div>
-                    <div class="despesa-info-extra">📅 ${data}</div>
-                </div>
-                <button class="btn-remover" onclick="removerCompra(${index})">Remover</button>
+    lista.innerHTML = valeCompras.map((compra, index) => `
+        <div class="despesa-item">
+            <div class="despesa-info">
+                <div class="despesa-nome">${compra.nome}</div>
+                <div class="despesa-valor">R$ ${compra.valor.toFixed(2)}</div>
+                <div class="despesa-info-extra">${compra.dataFormatada}</div>
             </div>
-        `;
-    }).join('');
+            <button class="btn-remover" onclick="removerCompra(${index})">Remover</button>
+        </div>
+    `).join('');
 }
 
 function atualizarValeResumo() {
-    const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
-    const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
+    const totalRecarga = valeRecargas.reduce((total, r) => total + r.valor, 0);
+    const totalGasto = valeCompras.reduce((total, c) => total + c.valor, 0);
     const saldo = totalRecarga - totalGasto;
 
     document.getElementById('vale-total-recarga').textContent = `R$ ${totalRecarga.toFixed(2)}`;
@@ -493,40 +680,9 @@ function atualizarValeResumo() {
     document.getElementById('vale-saldo').textContent = `R$ ${saldo.toFixed(2)}`;
 }
 
-function fecharMesVale() {
-    if (!confirm('Tem certeza que deseja fechar este mês do vale?')) return;
-
-    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-    const mesAtual = meses[valeMesAtualData.getMonth()];
-    const anoAtual = valeMesAtualData.getFullYear();
-    const totalRecarga = valeRecargas.reduce((total, recarga) => total + recarga.valor, 0);
-    const totalGasto = valeCompras.reduce((total, compra) => total + compra.valor, 0);
-    const saldo = totalRecarga - totalGasto;
-
-    valeHistorico.push({
-        mes: `${mesAtual} de ${anoAtual}`,
-        totalRecarga: totalRecarga,
-        totalGasto: totalGasto,
-        saldo: saldo,
-        compras: valeCompras.map(c => ({ ...c }))
-    });
-
-    valeRecargas = [];
-    valeCompras = [];
-    valeMesAtualData = new Date(valeMesAtualData);
-    valeMesAtualData.setMonth(valeMesAtualData.getMonth() + 1);
-    
-    atualizarValeMesAtual();
-    renderizarCompras();
-    atualizarValeResumo();
-    renderizarValeHistorico();
-    salvarDados();
-    alert('Mês do vale fechado com sucesso!');
-}
-
 function renderizarValeHistorico() {
     const lista = document.getElementById('vale-historico-lista');
+    
     if (valeHistorico.length === 0) {
         lista.innerHTML = '<p class="vazio">Nenhum histórico ainda</p>';
         return;
@@ -537,8 +693,12 @@ function renderizarValeHistorico() {
             <div class="historico-header">
                 <div class="historico-mes">${mes.mes}</div>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirValeHistorico(${index})">🔄 Reabrir</button>
-                    <button class="btn-remover" onclick="excluirValeHistorico(${index})">🗑️ Excluir</button>
+                    <button class="btn-remover" style="background:#667eea;" onclick="reabrirValeHistorico(${index})">
+                        🔄 Reabrir
+                    </button>
+                    <button class="btn-excluir-historico" onclick="excluirValeHistorico(${index})">
+                        🗑️ Excluir
+                    </button>
                 </div>
             </div>
             <div class="historico-resumo">
@@ -556,8 +716,13 @@ function renderizarValeHistorico() {
                 </div>
             </div>
             <div class="historico-despesas">
-                <h4>Compras:</h4>
-                ${mes.compras.map(c => `<div class="historico-despesa-item"><span>${c.nome}</span><span style="color: #ff6b6b;">R$ ${c.valor.toFixed(2)}</span></div>`).join('')}
+                <h4>Compras do mês:</h4>
+                ${mes.compras.map(compra => `
+                    <div class="historico-despesa-item">
+                        <span>${compra.nome} - ${compra.dataFormatada}</span>
+                        <span style="color: #ff6b6b;">R$ ${compra.valor.toFixed(2)}</span>
+                    </div>
+                `).join('')}
             </div>
         </div>
     `).join('');
@@ -565,51 +730,116 @@ function renderizarValeHistorico() {
 
 function reabrirValeHistorico(index) {
     const mes = valeHistorico[index];
-    if (!confirm(`Reabrir vale de ${mes.mes}?`)) return;
+
+    const confirmar = confirm(
+        `Reabrir ${mes.mes} do vale alimentação? O mês atual em edição será substituído pelo conteúdo deste fechamento.`
+    );
+    if (!confirmar) return;
 
     valeRecargas = [];
     valeCompras = mes.compras.map(c => ({ ...c }));
 
+    // Extrair o mês e ano do histórico
     const partes = mes.mes.split(' de ');
     if (partes.length === 2) {
+        const nomeMes = partes[0];
+        const ano = parseInt(partes[1], 10);
         const mesesNomes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-        const idxMes = mesesNomes.indexOf(partes[0]);
-        if (idxMes !== -1) valeMesAtualData = new Date(parseInt(partes[1]), idxMes, 1);
+        const idxMes = mesesNomes.indexOf(nomeMes);
+        if (idxMes !== -1 && !isNaN(ano)) {
+            mesAtualData = new Date(ano, idxMes, 1);
+        }
     }
 
+    // Remover do histórico
     valeHistorico.splice(index, 1);
+
     renderizarCompras();
     atualizarValeResumo();
     renderizarValeHistorico();
+    atualizarMesAtual();
     atualizarValeMesAtual();
     salvarDados();
+
+    alert(`Mês do vale ${mes.mes} reaberto para edição.`);
 }
 
-function excluirValeHistorico(index) {
-    if (confirm('Excluir este histórico de vale?')) {
-        valeHistorico.splice(index, 1);
-        renderizarValeHistorico();
-        salvarDados();
+function fecharMesVale() {
+    const totalRecarga = valeRecargas.reduce((total, r) => total + r.valor, 0);
+    const totalGasto = valeCompras.reduce((total, c) => total + c.valor, 0);
+    
+    if (totalRecarga === 0 && valeCompras.length === 0) {
+        alert('Adicione pelo menos uma recarga ou compra antes de fechar o mês.');
+        return;
     }
+
+    const confirmar = confirm('Deseja fechar o mês do vale alimentação e salvar no histórico? Os dados atuais serão zerados.');
+    if (!confirmar) return;
+
+    const saldo = totalRecarga - totalGasto;
+
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    
+    const mesHistorico = {
+        mes: `${meses[mesAtualData.getMonth()]} de ${mesAtualData.getFullYear()}`,
+        data: mesAtualData.toISOString(),
+        totalRecarga: totalRecarga,
+        totalGasto: totalGasto,
+        saldo: saldo,
+        compras: [...valeCompras]
+    };
+
+    valeHistorico.unshift(mesHistorico);
+
+    valeRecargas = [];
+    valeCompras = [];
+    document.getElementById('vale-recarga').value = '';
+    
+    // AVANÇAR O MÊS
+    mesAtualData.setMonth(mesAtualData.getMonth() + 1);
+    console.log('Novo mês (vale):', mesAtualData);
+    
+    atualizarMesAtual();
+    atualizarValeMesAtual();
+    renderizarCompras();
+    atualizarValeResumo();
+    renderizarValeHistorico();
+    salvarDados();
+
+    alert('Mês do vale alimentação fechado e salvo no histórico com sucesso!');
 }
 
-// COMPRAS FUTURAS
+// FUNÇÕES COMPRAS FUTURAS
 function adicionarCompraFutura() {
     const nome = document.getElementById('nome-futura').value.trim();
     const valor = parseFloat(document.getElementById('valor-futura').value);
     const dataInput = document.getElementById('data-futura').value;
     const prioridade = document.getElementById('prioridade-futura').value;
 
-    if (!nome || isNaN(valor) || !dataInput) return;
+    if (!nome || isNaN(valor) || valor <= 0 || !dataInput) {
+        alert('Por favor, preencha todos os campos corretamente.');
+        return;
+    }
 
     const data = new Date(dataInput + 'T12:00:00');
-    comprasFuturas.push({ nome, valor, prioridade, data: data.toISOString(), dataFormatada: data.toLocaleDateString('pt-BR') });
+    
+    comprasFuturas.push({ 
+        nome, 
+        valor,
+        prioridade,
+        data: data.toISOString(),
+        dataFormatada: data.toLocaleDateString('pt-BR')
+    });
+    
     comprasFuturas.sort((a, b) => new Date(a.data) - new Date(b.data));
     
     document.getElementById('nome-futura').value = '';
     document.getElementById('valor-futura').value = '';
     document.getElementById('data-futura').value = '';
+    document.getElementById('prioridade-futura').value = 'baixa';
+
     renderizarComprasFuturas();
     atualizarFuturasResumo();
     salvarDados();
@@ -624,259 +854,33 @@ function removerCompraFutura(index) {
 
 function renderizarComprasFuturas() {
     const lista = document.getElementById('lista-futuras');
+    
     if (comprasFuturas.length === 0) {
         lista.innerHTML = '<p class="vazio">Nenhuma compra futura planejada</p>';
         return;
     }
 
-    lista.innerHTML = comprasFuturas.map((c, index) => `
-        <div class="despesa-item">
-            <div class="despesa-info">
-                <div class="despesa-nome">${c.nome} <span class="prioridade-badge prioridade-${c.prioridade}">${c.prioridade}</span></div>
-                <div class="despesa-valor">R$ ${c.valor.toFixed(2)}</div>
-                <div class="despesa-info-extra">📅 ${c.dataFormatada}</div>
+    lista.innerHTML = comprasFuturas.map((compra, index) => {
+        const prioridadeClass = `prioridade-${compra.prioridade}`;
+        const prioridadeTexto = compra.prioridade.charAt(0).toUpperCase() + compra.prioridade.slice(1);
+        
+        return `
+            <div class="despesa-item">
+                <div class="despesa-info">
+                    <div class="despesa-nome">
+                        ${compra.nome}
+                        <span class="prioridade-badge ${prioridadeClass}">${prioridadeTexto}</span>
+                    </div>
+                    <div class="despesa-valor">R$ ${compra.valor.toFixed(2)}</div>
+                    <div class="despesa-info-extra">📅 ${compra.dataFormatada}</div>
+                </div>
+                <button class="btn-remover" onclick="removerCompraFutura(${index})">Remover</button>
             </div>
-            <button class="btn-remover" onclick="removerCompraFutura(${index})">Remover</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function atualizarFuturasResumo() {
     const total = comprasFuturas.reduce((sum, c) => sum + c.valor, 0);
     document.getElementById('total-futuras').textContent = `R$ ${total.toFixed(2)}`;
-}
-
-// LISTA DE COMPRAS SUPERMERCADO
-function adicionarItemCompra() {
-    const nome = document.getElementById('nome-item-compra').value.trim();
-    const quantidade = parseFloat(document.getElementById('quantidade-item').value);
-    const categoria = document.getElementById('categoria-item').value;
-
-    if (!nome || isNaN(quantidade) || quantidade <= 0) {
-        alert('Por favor, preencha o nome e a quantidade corretamente.');
-        return;
-    }
-
-    itensCompras.push({
-        id: Date.now(),
-        nome,
-        quantidade,
-        categoria,
-        coletado: false
-    });
-
-    document.getElementById('nome-item-compra').value = '';
-    document.getElementById('quantidade-item').value = '';
-    document.getElementById('categoria-item').value = 'alimentos';
-
-    renderizarItensCompras();
-    atualizarResumoCompras();
-    salvarDados();
-}
-
-function marcarItemColetado(id) {
-    const item = itensCompras.find(i => i.id === id);
-    if (item) {
-        item.coletado = !item.coletado;
-        renderizarItensCompras();
-        atualizarResumoCompras();
-        salvarDados();
-    }
-}
-
-function removerItemCompra(id) {
-    itensCompras = itensCompras.filter(i => i.id !== id);
-    renderizarItensCompras();
-    atualizarResumoCompras();
-    salvarDados();
-}
-
-function renderizarItensCompras() {
-    const lista = document.getElementById('lista-compras-supermercado');
-
-    if (itensCompras.length === 0) {
-        lista.innerHTML = '<p class="vazio">Nenhum item adicionado</p>';
-        return;
-    }
-
-    // Agrupar por categoria
-    const porCategoria = {};
-    itensCompras.forEach(item => {
-        if (!porCategoria[item.categoria]) {
-            porCategoria[item.categoria] = [];
-        }
-        porCategoria[item.categoria].push(item);
-    });
-
-    const categoriaLabels = {
-        'alimentos': '🥕 Alimentos',
-        'bebidas': '🥤 Bebidas',
-        'higiene': '🧼 Higiene e Limpeza',
-        'congelados': '❄️ Congelados',
-        'preco': '💰 Se estiver um bom preço compra',
-        'outros': '📦 Outros'
-    };
-
-    let html = '';
-    Object.entries(porCategoria).forEach(([categoria, items]) => {
-        const labelCategoria = categoriaLabels[categoria] || `📦 ${categoria}`;
-        html += `<div class="categoria-compras"><strong>${labelCategoria}</strong></div>`;
-        items.forEach(item => {
-            html += `
-                <div class="item-compra ${item.coletado ? 'coletado' : ''}">
-                    <label class="label-item-compra">
-                        <input type="checkbox" ${item.coletado ? 'checked' : ''} onchange="marcarItemColetado(${item.id})" class="checkbox-compra">
-                        <span class="nome-item">${item.nome}</span>
-                    </label>
-                    <span class="qtd-item">${item.quantidade}</span>
-                    <div style="display: flex; gap: 5px;">
-                        <button class="btn-remover-item" title="Comprar em outro lugar" onclick="enviarParaPendentes(${item.id})" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24;">⏸️</button>
-                        <button class="btn-remover-item" onclick="removerItemCompra(${item.id})">🗑️</button>
-                    </div>
-                </div>
-            `;
-        });
-    });
-
-    lista.innerHTML = html;
-}
-
-function atualizarResumoCompras() {
-    const totalItens = itensCompras.length;
-    const itensColetados = itensCompras.filter(i => i.coletado).length;
-    const percentual = totalItens > 0 ? Math.round((itensColetados / totalItens) * 100) : 0;
-
-    document.getElementById('total-itens').textContent = totalItens;
-    document.getElementById('itens-coletados').textContent = itensColetados;
-    document.getElementById('progresso-compras').textContent = `${percentual}%`;
-    
-    const barra = document.getElementById('barra-progresso');
-    barra.style.width = `${percentual}%`;
-}
-
-function limparListaCompras() {
-    if (confirm('Tem certeza que deseja limpar toda a lista de compras?')) {
-        itensCompras = [];
-        renderizarItensCompras();
-        atualizarResumoCompras();
-        salvarDados();
-    }
-}
-
-function resetarChecksCompras() {
-    itensCompras.forEach(item => {
-        item.coletado = false;
-    });
-    renderizarItensCompras();
-    atualizarResumoCompras();
-    salvarDados();
-}
-
-
-// ITENS PENDENTES (COMPRAR EM OUTRO LUGAR)
-function enviarParaPendentes(id) {
-    const item = itensCompras.find(i => i.id === id);
-    if (item) {
-        // Remover da lista atual
-        itensCompras = itensCompras.filter(i => i.id !== id);
-        
-        // Adicionar aos pendentes
-        itensPendentes.push({
-            id: item.id,
-            nome: item.nome,
-            quantidade: item.quantidade,
-            categoria: item.categoria,
-            dataPendente: new Date().toISOString()
-        });
-        
-        renderizarItensCompras();
-        renderizarItensPendentes();
-        atualizarResumoCompras();
-        salvarDados();
-    }
-}
-
-function trazerDePendentes(id) {
-    const item = itensPendentes.find(i => i.id === id);
-    if (item) {
-        // Remover dos pendentes
-        itensPendentes = itensPendentes.filter(i => i.id !== id);
-        
-        // Adicionar de volta à lista
-        itensCompras.push({
-            id: item.id,
-            nome: item.nome,
-            quantidade: item.quantidade,
-            categoria: item.categoria,
-            coletado: false
-        });
-        
-        renderizarItensCompras();
-        renderizarItensPendentes();
-        atualizarResumoCompras();
-        salvarDados();
-    }
-}
-
-function removerItemPendente(id) {
-    itensPendentes = itensPendentes.filter(i => i.id !== id);
-    renderizarItensPendentes();
-    salvarDados();
-}
-
-function renderizarItensPendentes() {
-    const lista = document.getElementById('lista-pendentes-supermercado');
-
-    if (itensPendentes.length === 0) {
-        lista.innerHTML = '<p class="vazio">Nenhum item pendente</p>';
-        return;
-    }
-
-    // Agrupar por categoria
-    const porCategoria = {};
-    itensPendentes.forEach(item => {
-        if (!porCategoria[item.categoria]) {
-            porCategoria[item.categoria] = [];
-        }
-        porCategoria[item.categoria].push(item);
-    });
-
-    const categoriaLabels = {
-        'alimentos': '🥕 Alimentos',
-        'bebidas': '🥤 Bebidas',
-        'higiene': '🧼 Higiene e Limpeza',
-        'congelados': '❄️ Congelados',
-        'preco': '💰 Se estiver um bom preço compra',
-        'outros': '📦 Outros'
-    };
-
-    let html = '';
-    Object.entries(porCategoria).forEach(([categoria, items]) => {
-        const labelCategoria = categoriaLabels[categoria] || `📦 ${categoria}`;
-        html += `<div class="categoria-compras"><strong>${labelCategoria}</strong></div>`;
-        items.forEach(item => {
-            html += `
-                <div class="item-compra">
-                    <label class="label-item-compra">
-                        <span class="nome-item">${item.nome}</span>
-                    </label>
-                    <span class="qtd-item">${item.quantidade}</span>
-                    <div style="display: flex; gap: 5px;">
-                        <button class="btn-remover-item" title="Voltar para lista" onclick="trazerDePendentes(${item.id})" style="background: rgba(102, 126, 234, 0.1); color: #667eea;">↩️</button>
-                        <button class="btn-remover-item" onclick="removerItemPendente(${item.id})">🗑️</button>
-                    </div>
-                </div>
-            `;
-        });
-    });
-
-    lista.innerHTML = html;
-}
-
-function limparListaPendentes() {
-    if (confirm('Tem certeza que deseja limpar toda a lista de pendentes?')) {
-        itensPendentes = [];
-        renderizarItensPendentes();
-        salvarDados();
-    }
 }
